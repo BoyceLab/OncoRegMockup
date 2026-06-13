@@ -1,0 +1,59 @@
+Variable / Field Name,Form Name,Section Header,Field Type,Field Label,"Choices, Calculations, OR Slider Labels",Field Note,Text Validation Type OR Show Slider Number,Text Validation Min,Text Validation Max,Identifier?,Branching Logic (Show field only if...),Required Field?,Custom Alignment,Question Number (surveys only),Matrix Group Name,Matrix Ranking?,Field Annotation
+record_id,eligibility,Study eligibility,text,Participant ID,,Auto generated study ID. Not the medical record number.,,,,,,y,,,,,
+consent_date,eligibility,,text,Date informed consent signed,,,date_mdy,,,,,y,,,,,
+age_confirm,eligibility,,yesno,Participant is 18 years of age or older,,,,,,,,y,,,,,
+dx_confirm,eligibility,,yesno,Participant has a confirmed cancer diagnosis,,,,,,,,y,,,,,
+enroll_status,eligibility,,dropdown,Enrollment status,"1, Screening | 2, Enrolled | 3, Withdrawn | 4, Completed",,,,,,,,,,,,
+dob,demographics,About you,text,Date of birth,,,date_mdy,,,y,,,,,,,
+sex_birth,demographics,,radio,Sex assigned at birth,"1, Female | 2, Male | 3, Intersex | 4, Prefer not to answer",,,,,,,,,,,,
+gender,demographics,,radio,Gender identity,"1, Woman | 2, Man | 3, Nonbinary | 4, Other | 5, Prefer not to answer",,,,,,,,,,,,
+race,demographics,,checkbox,Race (select all that apply),"1, American Indian or Alaska Native | 2, Asian | 3, Black or African American | 4, Native Hawaiian or Other Pacific Islander | 5, White | 6, Other",,,,,,,,,,,,
+ethnicity,demographics,,radio,Ethnicity,"1, Hispanic or Latino | 2, Not Hispanic or Latino | 3, Prefer not to answer",,,,,,,,,,,,
+zip,demographics,,text,ZIP code,,,zipcode,,,y,,,,,,,
+education,demographics,,dropdown,Highest level of education completed,"1, Less than high school | 2, High school or GED | 3, Some college | 4, Associate degree | 5, Bachelor degree | 6, Graduate degree",,,,,,,,,,,,
+cancer_type,cancer_history,Your cancer diagnosis,dropdown,Primary cancer type,"1, Breast | 2, Lung | 3, Colorectal | 4, Prostate | 5, Melanoma | 6, Lymphoma | 7, Leukemia | 8, Pancreatic | 9, Ovarian | 10, Other",,,,,,,,,,,,
+dx_date,cancer_history,,text,Approximate date of diagnosis,,,date_mdy,,,,,,,,,,
+stage_dx,cancer_history,,dropdown,Stage at diagnosis,"0, Stage 0 | 1, Stage I | 2, Stage II | 3, Stage III | 4, Stage IV | 9, Unknown",,,,,,,,,,,,
+tx_current,cancer_history,,checkbox,Current or recent treatments (select all that apply),"1, Surgery | 2, Chemotherapy | 3, Radiation | 4, Immunotherapy | 5, Targeted therapy | 6, Hormone therapy | 7, Stem cell transplant | 8, Clinical trial | 9, None currently",,,,,,,,,,,,
+onc_team,cancer_history,,yesno,Are you currently followed by an oncology care team,,,,,,,,,,,,,
+pro_intro,pro_wellbeing,How you have been feeling,descriptive,"The next questions ask how you have felt over the past 7 days. These are original example items written for this demonstration and are not a licensed instrument such as FACT-G, EORTC QLQ-C30, or PROMIS.",,,,,,,,,,,,,
+pro_fatigue,pro_wellbeing,,radio,I have felt tired or low on energy,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_phys,,
+pro_pain,pro_wellbeing,,radio,I have had pain that interfered with my day,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_phys,,
+pro_nausea,pro_wellbeing,,radio,I have felt nauseated,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_phys,,
+pro_sleep,pro_wellbeing,,radio,I have had trouble sleeping,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_phys,,
+pro_worry,pro_wellbeing,,radio,I have worried about my health,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_emot,,
+pro_sad,pro_wellbeing,,radio,I have felt sad or down,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_emot,,
+pro_cope,pro_wellbeing,,radio,I have felt able to cope with my illness,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_emot,,
+pro_activities,pro_wellbeing,,radio,I have been able to do my usual daily activities,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_func,,
+pro_enjoy,pro_wellbeing,,radio,I have been able to enjoy the things I usually do,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_func,,
+pro_support,pro_wellbeing,,radio,I have felt supported by family or friends,"0, Not at all | 1, A little | 2, Somewhat | 3, Quite a bit | 4, Very much",,,,,,,,,,pro_func,,
+pro_overall,pro_wellbeing,,slider,"Overall, how would you rate your quality of life this week",Poor | Fair | Excellent,Slide from 0 (poor) to 100 (excellent).,,,,,,,,,,,
+cam_ever,cam_use,Complementary and integrative therapies,yesno,"Since your diagnosis, have you used any complementary or integrative therapies",,These are approaches used alongside standard cancer care.,,,,,,,,,,,
+cam_modalities,cam_use,,checkbox,Which have you used (select all that apply),"1, Acupuncture | 2, Massage therapy | 3, Yoga | 4, Meditation or mindfulness | 5, Reiki or energy healing | 6, Chiropractic | 7, Naturopathy | 8, Homeopathy | 9, Herbal medicine | 10, Traditional Chinese medicine | 11, Ayurveda | 12, Aromatherapy | 13, Music or art therapy | 14, Prayer or spiritual healing | 15, Special diet | 16, Cannabis or CBD | 17, Other",,,,,,[cam_ever] = '1',,,,,,
+cam_freq,cam_use,,radio,About how often do you use these therapies,"1, Daily | 2, Weekly | 3, Monthly | 4, Occasionally",,,,,,[cam_ever] = '1',,,,,,
+cam_reason,cam_use,,checkbox,Why do you use them (select all that apply),"1, Manage symptoms | 2, Reduce treatment side effects | 3, Improve quality of life | 4, Support the immune system | 5, Treat the cancer itself | 6, Emotional or spiritual wellbeing | 7, Recommended by family or friend | 8, Recommended by a provider",,,,,,[cam_ever] = '1',,,,,,
+cam_disclosed,cam_use,,yesno,Have you told your oncology team about these therapies,,,,,,,[cam_ever] = '1',,,,,,
+cam_benefit,cam_use,,radio,How much do you feel these therapies have helped you,"0, Not at all | 1, A little | 2, Moderately | 3, A great deal",,,,,,[cam_ever] = '1',,,,,,
+cam_cost,cam_use,,text,Roughly how much do you spend on these per month (US dollars),,,number,,,,[cam_ever] = '1',,,,,,
+supp_use,supplements,Dietary supplements,yesno,"Since your diagnosis, have you taken any vitamins, minerals, or dietary supplements",,,,,,,,,,,,,
+supp_list,supplements,,checkbox,Which do you take (select all that apply),"1, Vitamin D | 2, Vitamin C | 3, Multivitamin | 4, Calcium | 5, Magnesium | 6, Zinc | 7, Selenium | 8, Fish oil or omega 3 | 9, Turmeric or curcumin | 10, Green tea extract | 11, Melatonin | 12, Probiotics | 13, Mushroom extract (reishi, turkey tail) | 14, CBD | 15, Ginger | 16, Ashwagandha | 17, Milk thistle | 18, Glutamine | 19, B vitamins | 20, Iron | 21, Other",,,,,,[supp_use] = '1',,,,,,
+supp_timing,supplements,,checkbox,When do you take them relative to cancer treatment,"1, Before treatment | 2, During treatment | 3, After treatment | 4, Between cycles",,,,,,[supp_use] = '1',,,,,,
+supp_source,supplements,,checkbox,Where do you get them (select all that apply),"1, Pharmacy | 2, Grocery or health food store | 3, Online retailer | 4, Recommended by a naturopath | 5, Recommended by oncology team | 6, Friend or family",,,,,,[supp_use] = '1',,,,,,
+supp_disclosed,supplements,,yesno,Have you told your oncology team about your supplements,,,,,,,[supp_use] = '1',,,,,,
+supp_interaction,supplements,,yesno,Are you concerned that any supplement could interact with your cancer treatment,,,,,,,[supp_use] = '1',,,,,,
+supp_detail_name,supplements,Supplement detail (one supplement per record when enabled as a repeating instrument),text,Supplement name,,,,,,,[supp_use] = '1',,,,,,@ This instrument can be enabled as a repeating instrument to record one supplement per row.
+supp_detail_dose,supplements,,text,Dose per day,,,,,,,[supp_use] = '1',,,,,,
+supp_detail_freq,supplements,,dropdown,How often do you take it,"1, Once daily | 2, Twice daily | 3, Three times daily | 4, As needed | 5, Weekly",,,,,,[supp_use] = '1',,,,,,
+ehr_conditions,ehr_structured,"Structured EHR data, retrieved through the participant authorized connection",notes,Problem list and diagnoses,,,,,,,,,,,,,@READONLY  FHIR: Condition.code  (SNOMED CT / ICD-10-CM)
+ehr_medications,ehr_structured,,notes,Active and past medications,,,,,,,,,,,,,@READONLY  FHIR: MedicationRequest.medicationCodeableConcept  (RxNorm)
+ehr_labs,ehr_structured,,notes,Laboratory results,,,,,,,,,,,,,@READONLY  FHIR: Observation [laboratory]  (LOINC)
+ehr_vitals,ehr_structured,,notes,Vital signs,,,,,,,,,,,,,@READONLY  FHIR: Observation [vital-signs]
+ehr_procedures,ehr_structured,,notes,Procedures and surgeries,,,,,,,,,,,,,@READONLY  FHIR: Procedure.code  (CPT / SNOMED CT)
+ehr_immunizations,ehr_structured,,notes,Immunizations,,,,,,,,,,,,,@READONLY  FHIR: Immunization  (CVX)
+ehr_allergies,ehr_structured,,notes,Allergies and intolerances,,,,,,,,,,,,,@READONLY  FHIR: AllergyIntolerance
+ehr_encounters,ehr_structured,,notes,Encounters and visits,,,,,,,,,,,,,@READONLY  FHIR: Encounter
+ehr_oncology_obs,ehr_structured,,notes,Cancer staging and tumor observations,,,,,,,,,,,,,"@READONLY  FHIR: Observation, Condition  (mCODE profile)"
+ehr_notes,ehr_unstructured,"Unstructured EHR data, added in a second phase",notes,Clinical notes,,,,,,,,,,,,,@READONLY  FHIR: DocumentReference  (LOINC document type)
+ehr_path,ehr_unstructured,,notes,Pathology reports,,,,,,,,,,,,,@READONLY  FHIR: DiagnosticReport [pathology]
+ehr_rad,ehr_unstructured,,notes,Radiology reports,,,,,,,,,,,,,@READONLY  FHIR: DiagnosticReport [imaging]
+nlp_concepts,ehr_unstructured,,notes,"Concepts extracted from notes (symptoms, supplements, and therapies named in free text)",,,,,,,,,,,,,@READONLY  Derived: natural language processing over DocumentReference
