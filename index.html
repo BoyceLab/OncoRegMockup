@@ -88,6 +88,17 @@ tr:nth-child(even) td{background:#fbfaf8}
 .pv.survey{background:#e7f0fb;color:#1d5fa3;border-color:#b9d4ef}
 .pv.both{background:#eef6ee;color:#3c7a3c;border-color:#c4ddbf}
 .pv.derived{background:#f1efe9;color:#6b6b6b;border-color:#d8d2c4}
+.src{font-size:10px;font-weight:700;border-radius:3px;padding:1px 6px;white-space:nowrap;border:1px solid;display:inline-block;margin:1px 2px 1px 0}
+.src.naaccr{background:#efeaf6;color:#5a3a8a;border-color:#d4c5ea}
+.src.nci{background:#e9f2ee;color:#1f6b4a;border-color:#bfe0d0}
+.src.aou{background:#eaf0f8;color:#214a86;border-color:#c3d4ec}
+.src.local{background:#f6efe9;color:#8a5a2a;border-color:#e6d2bd}
+.uploadbox{border:2px dashed #c4b9a4;border-radius:8px;padding:24px;text-align:center;background:#fbfaf7;cursor:pointer}
+.uploadbox:hover{background:#f5f1e8;border-color:#a98e63}
+.mychart .ah{background:#c8102e}
+.mychart-menu{display:flex;flex-direction:column;gap:2px}
+.mychart-menu a{padding:8px 10px;border:1px solid #eee;border-radius:5px;background:#fff;color:#214a86}
+.mychart-menu a:hover{background:#f3f7fc;text-decoration:none}
 
 /* dot statuses */
 .dot{display:inline-block;width:13px;height:13px;border-radius:50%;border:1px solid rgba(0,0,0,.25);vertical-align:middle}
@@ -213,12 +224,14 @@ tr:nth-child(even) td{background:#fbfaf8}
       <a class="nav" data-view="setup"><span class="ic">&#9776;</span>Project Setup</a>
       <a class="nav" data-view="designer"><span class="ic">&#9998;</span>Online Designer</a>
       <a class="nav" data-view="dictionary"><span class="ic">&#9783;</span>Data Dictionary</a>
+      <a class="nav" data-view="harmonized"><span class="ic">&#9776;</span>Harmonized Dictionary</a>
     </div>
     <div class="grp">
       <div class="grphd">Data Collection</div>
       <a class="nav" data-view="survey_pro"><span class="ic">&#9745;</span>Survey: Outcomes (PRO)</a>
       <a class="nav" data-view="survey_cam"><span class="ic">&#9745;</span>Survey: CAM &amp; Supplements</a>
       <a class="nav" data-view="connect"><span class="ic">&#9883;</span>Connect Health Records</a>
+      <a class="nav" data-view="ccda"><span class="ic">&#128193;</span>Download &amp; Upload (C-CDA)</a>
       <a class="nav" data-view="mapping"><span class="ic">&#8644;</span>Clinical Data Mapping</a>
       <a class="nav" data-view="naaccr"><span class="ic">&#9783;</span>NAACCR Crosswalk</a>
     </div>
@@ -363,6 +376,129 @@ const NAACCR_CROSSWALK = [
   ['1760','Vital Status','Follow-up','derived','EHR + death index (NDI) linkage','vital_status','Not self-reported']
 ];
 
+/* ============================================================
+   HARMONIZED CROSS-SOURCE DICTIONARY
+   Reconciles three standards. Source attribution per element:
+     naaccr -> NAACCR item number (verified, apps.naaccr.org)
+     nci    -> NCI caDSR II CDE / NCI Thesaurus (cadsr.cancer.gov; Public ID via CDE Browser)
+     aou    -> All of Us CDR Data Dictionary v8 PPI survey module (support.researchallofus.org)
+     local  -> Defined for this project (no external standard)
+   fields: domain,label,name,type,choices,naaccr,nci,aou,prov
+   ============================================================ */
+const HARMON = [
+  // Enrollment / identifiers
+  {domain:'Enrollment',label:'Record ID',name:'record_id',type:'text',choices:'',naaccr:'',nci:false,aou:'',prov:'survey'},
+  {domain:'Enrollment',label:'Date consent signed',name:'consent_date',type:'text',choices:'',naaccr:'',nci:true,aou:'',prov:'survey'},
+
+  // Demographics (heavy overlap)
+  {domain:'Demographics',label:'Date of Birth',name:'dob',type:'text',choices:'',naaccr:'240',nci:true,aou:'The Basics',prov:'both'},
+  {domain:'Demographics',label:'Sex',name:'sex_birth',type:'radio',choices:'1, Female | 2, Male | 3, Intersex | 4, Prefer not to answer',naaccr:'220',nci:true,aou:'The Basics',prov:'both'},
+  {domain:'Demographics',label:'Gender identity',name:'gender',type:'dropdown',choices:'1, Woman | 2, Man | 3, Nonbinary | 4, Self-describe | 5, Prefer not to answer',naaccr:'',nci:true,aou:'The Basics',prov:'survey'},
+  {domain:'Demographics',label:'Sexual orientation',name:'sexual_orientation',type:'dropdown',choices:'1, Straight | 2, Gay or lesbian | 3, Bisexual | 4, Other | 5, Prefer not to answer',naaccr:'',nci:false,aou:'The Basics',prov:'survey'},
+  {domain:'Demographics',label:'Race (select all)',name:'race',type:'checkbox',choices:'1, American Indian or Alaska Native | 2, Asian | 3, Black or African American | 4, Native Hawaiian or Pacific Islander | 5, White | 6, Other',naaccr:'160',nci:true,aou:'The Basics',prov:'both'},
+  {domain:'Demographics',label:'Hispanic or Latino origin',name:'ethnicity',type:'radio',choices:'1, Hispanic or Latino | 2, Not Hispanic or Latino | 3, Prefer not to answer',naaccr:'190',nci:true,aou:'The Basics',prov:'both'},
+  {domain:'Demographics',label:'Highest education completed',name:'education',type:'dropdown',choices:'1, Less than high school | 2, High school or GED | 3, Some college | 4, Associate | 5, Bachelor | 6, Graduate',naaccr:'',nci:true,aou:'The Basics',prov:'survey'},
+  {domain:'Demographics',label:'Employment status',name:'employment',type:'dropdown',choices:'1, Employed | 2, Self-employed | 3, Unemployed | 4, Retired | 5, Unable to work | 6, Student',naaccr:'',nci:false,aou:'The Basics',prov:'survey'},
+  {domain:'Demographics',label:'Annual household income',name:'income',type:'dropdown',choices:'1, Under 25k | 2, 25-50k | 3, 50-100k | 4, 100-200k | 5, Over 200k | 9, Prefer not to answer',naaccr:'',nci:false,aou:'The Basics',prov:'survey'},
+  {domain:'Demographics',label:'Health insurance type',name:'insurance',type:'checkbox',choices:'1, Employer | 2, Medicare | 3, Medicaid | 4, Marketplace | 5, VA | 6, None',naaccr:'',nci:false,aou:'Health Care Access & Utilization',prov:'survey'},
+
+  // Cancer identification / diagnosis
+  {domain:'Diagnosis',label:'Date of Diagnosis',name:'dx_date',type:'text',choices:'',naaccr:'390',nci:true,aou:'',prov:'both'},
+  {domain:'Diagnosis',label:'Primary Site (ICD-O-3 topography)',name:'primary_site',type:'dropdown',choices:'1, Breast (C50) | 2, Lung (C34) | 3, Colorectal (C18-C20) | 4, Prostate (C61) | 5, Lymphoma (C77/C42) | 6, Pancreas (C25) | 7, Ovary (C56) | 8, Skin / melanoma (C44) | 9, Other',naaccr:'400',nci:true,aou:'',prov:'both'},
+  {domain:'Diagnosis',label:'Laterality',name:'laterality',type:'dropdown',choices:'0, Not a paired site | 1, Right | 2, Left | 4, Bilateral | 9, Unknown',naaccr:'410',nci:true,aou:'',prov:'both'},
+  {domain:'Diagnosis',label:'Histologic Type (ICD-O-3)',name:'histology',type:'text',choices:'',naaccr:'522',nci:true,aou:'',prov:'ehr'},
+  {domain:'Diagnosis',label:'Behavior Code (ICD-O-3)',name:'behavior',type:'dropdown',choices:'0, Benign | 1, Uncertain | 2, In situ | 3, Malignant',naaccr:'523',nci:true,aou:'',prov:'ehr'},
+  {domain:'Diagnosis',label:'Diagnostic Confirmation',name:'dx_confirm',type:'dropdown',choices:'1, Positive histology | 2, Positive cytology | 5, Positive lab / marker | 7, Radiology / imaging | 8, Clinical only',naaccr:'490',nci:true,aou:'',prov:'ehr'},
+  {domain:'Diagnosis',label:'Self-reported cancer history',name:'aou_cancer_hx',type:'yesno',choices:'',naaccr:'',nci:true,aou:'Personal & Family Health History',prov:'survey'},
+
+  // Staging & biomarkers
+  {domain:'Staging & Biomarkers',label:'Summary Stage 2018',name:'summary_stage',type:'dropdown',choices:'0, In situ | 1, Localized | 2, Regional direct | 3, Regional nodes | 7, Distant | 9, Unknown',naaccr:'764',nci:true,aou:'',prov:'ehr'},
+  {domain:'Staging & Biomarkers',label:'Estrogen Receptor Summary',name:'er_summary',type:'dropdown',choices:'0, Negative | 1, Positive | 9, Unknown',naaccr:'3827',nci:true,aou:'',prov:'ehr'},
+  {domain:'Staging & Biomarkers',label:'Progesterone Receptor Summary',name:'pr_summary',type:'dropdown',choices:'0, Negative | 1, Positive | 9, Unknown',naaccr:'3915',nci:true,aou:'',prov:'ehr'},
+  {domain:'Staging & Biomarkers',label:'HER2 Overall Summary',name:'her2_summary',type:'dropdown',choices:'0, Negative | 1, Positive | 9, Unknown',naaccr:'3855',nci:true,aou:'',prov:'ehr'},
+
+  // Treatment
+  {domain:'Treatment',label:'Surgery of Primary Site',name:'rx_surgery',type:'yesno',choices:'',naaccr:'1290',nci:true,aou:'',prov:'both'},
+  {domain:'Treatment',label:'Radiation',name:'rx_radiation',type:'yesno',choices:'',naaccr:'1360',nci:true,aou:'',prov:'both'},
+  {domain:'Treatment',label:'Chemotherapy',name:'rx_chemo',type:'yesno',choices:'',naaccr:'1390',nci:true,aou:'',prov:'both'},
+  {domain:'Treatment',label:'Hormone Therapy',name:'rx_hormone',type:'yesno',choices:'',naaccr:'1400',nci:true,aou:'',prov:'both'},
+  {domain:'Treatment',label:'Immunotherapy (BRM)',name:'rx_brm',type:'yesno',choices:'',naaccr:'1410',nci:true,aou:'',prov:'both'},
+
+  // Outcomes
+  {domain:'Outcomes',label:'Date of Last Contact',name:'last_contact',type:'text',choices:'',naaccr:'1750',nci:true,aou:'',prov:'both'},
+  {domain:'Outcomes',label:'Vital Status',name:'vital_status',type:'dropdown',choices:'1, Alive | 0, Dead',naaccr:'1760',nci:true,aou:'',prov:'derived'},
+
+  // Patient reported outcomes
+  {domain:'Patient Reported Outcomes',label:'Overall health rating',name:'pro_global',type:'radio',choices:'5, Excellent | 4, Very good | 3, Good | 2, Fair | 1, Poor',naaccr:'',nci:true,aou:'Overall Health',prov:'survey'},
+  {domain:'Patient Reported Outcomes',label:'Fatigue, worst in 7 days',name:'pro_fatigue',type:'radio',choices:'1, None | 2, Mild | 3, Moderate | 4, Severe | 5, Very severe',naaccr:'',nci:true,aou:'',prov:'survey'},
+  {domain:'Patient Reported Outcomes',label:'Pain interference',name:'pro_pain',type:'radio',choices:'1, Not at all | 2, A little | 3, Somewhat | 4, Quite a bit | 5, Very much',naaccr:'',nci:true,aou:'',prov:'survey'},
+  {domain:'Patient Reported Outcomes',label:'Days physical health not good (past 30)',name:'aou_phys_days',type:'text',choices:'',naaccr:'',nci:false,aou:'Overall Health',prov:'survey'},
+
+  // Lifestyle (cancer-relevant)
+  {domain:'Lifestyle',label:'Smoking status',name:'smoking',type:'dropdown',choices:'1, Never | 2, Former | 3, Current some days | 4, Current every day',naaccr:'',nci:true,aou:'Lifestyle',prov:'survey'},
+  {domain:'Lifestyle',label:'Pack-years',name:'pack_years',type:'text',choices:'',naaccr:'',nci:true,aou:'Lifestyle',prov:'survey'},
+  {domain:'Lifestyle',label:'Alcohol use frequency',name:'alcohol',type:'dropdown',choices:'1, Never | 2, Monthly or less | 3, 2-4 per month | 4, 2-3 per week | 5, 4+ per week',naaccr:'',nci:true,aou:'Lifestyle',prov:'survey'},
+
+  // CAM & supplements (project-specific)
+  {domain:'CAM & Supplements',label:'Any supplement / CAM use (30 days)',name:'cam_any',type:'yesno',choices:'',naaccr:'',nci:false,aou:'',prov:'survey',local:true},
+  {domain:'CAM & Supplements',label:'Supplement categories used',name:'cam_categories',type:'checkbox',choices:'1, Vitamins/minerals | 2, Herbal/botanical | 3, Probiotics | 4, Cannabinoids | 5, Antioxidants | 6, Other',naaccr:'',nci:false,aou:'',prov:'survey',local:true},
+  {domain:'CAM & Supplements',label:'Disclosed supplement use to oncology team',name:'cam_disclosed',type:'yesno',choices:'',naaccr:'',nci:false,aou:'',prov:'survey',local:true},
+  {domain:'CAM & Supplements',label:'Mind-body practices used',name:'cam_practices',type:'checkbox',choices:'1, Acupuncture | 2, Meditation | 3, Yoga | 4, Massage | 5, Reiki | 6, None',naaccr:'',nci:false,aou:'',prov:'survey',local:true},
+
+  // Family history
+  {domain:'Family & Medical History',label:'Family history of cancer',name:'fam_cancer',type:'yesno',choices:'',naaccr:'',nci:true,aou:'Personal & Family Health History',prov:'survey'},
+  {domain:'Family & Medical History',label:'Other chronic conditions',name:'comorbidities',type:'checkbox',choices:'1, Diabetes | 2, Hypertension | 3, Heart disease | 4, Lung disease | 5, Kidney disease | 6, None',naaccr:'',nci:true,aou:'Personal & Family Health History',prov:'both'},
+
+  // Healthcare access & SDOH
+  {domain:'Access & Social Drivers',label:'Delayed care due to cost',name:'delayed_care',type:'yesno',choices:'',naaccr:'',nci:false,aou:'Health Care Access & Utilization',prov:'survey'},
+  {domain:'Access & Social Drivers',label:'Food insecurity (past 12 months)',name:'food_insecurity',type:'radio',choices:'1, Never | 2, Sometimes | 3, Often',naaccr:'',nci:false,aou:'Social Determinants of Health',prov:'survey'},
+  {domain:'Access & Social Drivers',label:'Transportation barrier to care',name:'transport',type:'yesno',choices:'',naaccr:'',nci:false,aou:'Social Determinants of Health',prov:'survey'},
+  {domain:'Access & Social Drivers',label:'Social support availability',name:'social_support',type:'radio',choices:'1, None of the time | 2, Some of the time | 3, Most of the time | 4, All of the time',naaccr:'',nci:false,aou:'Social Determinants of Health',prov:'survey'}
+];
+
+// Source citation strings
+const SRC_CITE = {
+  naaccr:'NAACCR Data Standards and Data Dictionary, Vol. II (apps.naaccr.org). Item numbers verified.',
+  nci:'NCI caDSR II CDE / NCI Thesaurus (cadsr.cancer.gov). Exact CDE Public ID via the caDSR II CDE Browser.',
+  aou:'All of Us CDR Data Dictionary v8, PPI survey modules (support.researchallofus.org).',
+  local:'Defined for this project; no external standard source.'
+};
+function srcBadges(el){
+  const b=[];
+  if(el.naaccr) b.push(`<span class="src naaccr">NAACCR ${el.naaccr}</span>`);
+  if(el.nci) b.push(`<span class="src nci">NCI caDSR</span>`);
+  if(el.aou) b.push(`<span class="src aou">AoU: ${esc(el.aou)}</span>`);
+  if(el.local) b.push(`<span class="src local">This project</span>`);
+  if(!b.length) b.push(`<span class="src local">This project</span>`);
+  return b.join('');
+}
+function srcWhich(el){
+  const s=[];
+  if(el.naaccr) s.push('NAACCR'); if(el.nci) s.push('NCI'); if(el.aou) s.push('All of Us'); if(el.local||(!el.naaccr&&!el.nci&&!el.aou)) s.push('This project');
+  return s.length>1?`Both (${s.join(' + ')})`:s[0];
+}
+// Build an importable REDCap data dictionary CSV from the harmonized set
+function harmonToCSV(){
+  const cols=['Variable / Field Name','Form Name','Section Header','Field Type','Field Label',
+    'Choices, Calculations, OR Slider Labels','Field Note','Text Validation Type OR Show Slider Number',
+    'Text Validation Min','Text Validation Max','Identifier?','Branching Logic (Show field only if...)',
+    'Required Field?','Custom Alignment','Question Number (surveys only)','Matrix Group Name','Matrix Ranking?','Field Annotation'];
+  const q=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const redcapType={text:'text',notes:'notes',dropdown:'dropdown',radio:'radio',checkbox:'checkbox',yesno:'yesno',slider:'slider'};
+  const lines=[cols.map(q).join(',')];
+  HARMON.forEach(el=>{
+    const ann=[];
+    if(el.naaccr) ann.push('@NAACCR='+el.naaccr);
+    if(el.nci) ann.push('NCI:caDSR');
+    if(el.aou) ann.push('AoU:'+el.aou.replace(/\s+/g,'_'));
+    if(el.local) ann.push('LOCAL');
+    ann.push('SOURCE='+srcWhich(el));
+    const form=el.domain.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+    lines.push([el.name,form,el.domain,redcapType[el.type]||'text',el.label,el.choices,'', '', '','','','','','','','','',ann.join(' | ')].map(q).join(','));
+  });
+  return lines.join('\n');
+}
+
 // Mock records for dashboard / export
 const STATUS = ['g','y','r','x'];
 const SITES = ['Breast','Lung','Colorectal','Prostate','Lymphoma','Pancreatic','Ovarian','Melanoma'];
@@ -457,9 +593,11 @@ VIEWS.home = ()=>`
     <li><a data-view="designer">Online Designer</a>: how a team builds instruments and fields without writing code.</li>
     <li><a data-view="dictionary">Data Dictionary</a>: the spreadsheet that defines everything, with download and upload.</li>
     <li><a data-view="survey_pro">Outcomes survey</a> and <a data-view="survey_cam">CAM &amp; Supplements survey</a>: the participant experience.</li>
-    <li><a data-view="connect">Connect Health Records</a>: the authorization flow and live data arrival.</li>
+    <li><a data-view="connect">Connect Health Records</a>: the live authorization flow and data arrival.</li>
+    <li><a data-view="ccda">Download &amp; Upload (C-CDA)</a>: the file path, where a participant downloads a zip from MyChart and uploads it.</li>
     <li><a data-view="mapping">Clinical Data Mapping</a>: how raw FHIR becomes registry fields.</li>
     <li><a data-view="naaccr">NAACCR Crosswalk</a>: which standard cancer registry items come from EHR, survey, or both.</li>
+    <li><a data-view="harmonized">Harmonized Dictionary</a>: one dictionary reconciled across NAACCR, NCI, and All of Us, downloadable for REDCap.</li>
     <li><a data-view="dashboard">Dashboard</a>, <a data-view="reports">Visualizations</a>, and <a data-view="export">Exports</a>.</li>
   </ul>
 `;
@@ -872,6 +1010,165 @@ VIEWS.naaccr = ()=>{
   `;
 };
 
+/* ---- MyChart C-CDA download then upload ---- */
+VIEWS.ccda = ()=>`
+  <div class="crumbs">Data Collection &rsaquo; <b>Download &amp; Upload Records (C-CDA zip)</b></div>
+  <h2>Bring Records by File: Download from MyChart, Upload Here</h2>
+  <p class="muted" style="max-width:820px">
+    A second patient-directed path that works even when a live connection is not set up. The participant downloads
+    their own health record from their portal as a C-CDA file (a zip of standardized XML), then uploads that zip into
+    the registry. Same person, same data rights, no clinic or vendor in the loop. This complements the
+    <a data-view="connect">live SMART on FHIR connection</a>.
+  </p>
+  <div class="stepper" id="cdstep">
+    <div class="st active">1. Open portal</div>
+    <div class="st">2. Find sharing</div>
+    <div class="st">3. Download .zip</div>
+    <div class="st">4. Upload here</div>
+    <div class="st">5. Parsed</div>
+  </div>
+  <div class="stagebox" id="cdstage"></div>
+  <div class="flexrow mt"><a class="btn gray" id="cdback">&larr; Back</a><a class="btn" id="cdnext">Next &rarr;</a></div>
+  <div class="note mt"><b>Who does what.</b> The participant performs the download in their own portal and the upload here. Study staff never touch the patient's portal credentials. Uploaded documents are stored whole, then the same text-processing and review step used elsewhere extracts coded fields.</div>
+`;
+
+let cdIdx=0;
+const cdStages=[
+  ()=>`<h3>Step 1. Open your patient portal</h3>
+    <p class="muted">Most US health systems run MyChart or a similar portal. Sign in as you normally would.</p>
+    <div class="fakeauth mychart">
+      <div class="ah">MyChart &mdash; Metro Cancer Center</div>
+      <div class="ab">
+        <label>MyChart username</label><input type="text" value="jamie.patient">
+        <label>Password</label><input type="password" value="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+        <div class="mt"><a class="btn" id="cdnext2" style="width:100%;text-align:center">Sign in</a></div>
+      </div>
+    </div>`,
+  ()=>`<h3>Step 2. Find the document sharing area</h3>
+    <p class="muted">Look under the menu for sharing or documents. The exact label varies, but the function is the same: export your own record.</p>
+    <div class="fakeauth mychart" style="max-width:340px"><div class="ah">Menu</div><div class="ab mychart-menu">
+      <a>Visits</a><a>Test Results</a><a>Medications</a>
+      <a id="cdnext2"><b>Sharing Hub &rarr; Download My Record</b></a>
+      <a>Document Center</a><a>Billing</a>
+    </div></div>
+    <div class="muted mt" style="font-size:11.5px">In MyChart this is often "Sharing Hub", "Document Center", or the older "Lucy / Download My Record".</div>`,
+  ()=>`<h3>Step 3. Download as a C-CDA (.zip)</h3>
+    <p class="muted">Choose a date range and request the standardized download. You receive a zip containing C-CDA XML (problems, medications, results, procedures, encounters).</p>
+    <div class="fakeauth mychart" style="max-width:420px"><div class="ah">Download My Record</div><div class="ab">
+      <label>Date range</label>
+      <select style="width:100%;padding:7px;border:1px solid #bbb;border-radius:4px"><option>All available history</option><option>Last 3 years</option><option>Since diagnosis</option></select>
+      <label style="margin-top:8px">Format</label>
+      <select style="width:100%;padding:7px;border:1px solid #bbb;border-radius:4px"><option>Continuity of Care Document (C-CDA, .zip)</option></select>
+      <div class="mt"><a class="btn" id="cdnext2" style="width:100%;text-align:center">&#8681; Download MyRecord_CCDA.zip</a></div>
+    </div></div>
+    <div class="muted mt" style="font-size:11.5px">The file saves to the participant's own device. Nothing has reached the registry yet.</div>`,
+  ()=>`<h3>Step 4. Upload the zip into the registry</h3>
+    <p class="muted">Back in the OncoRegistry survey, the participant uploads the file they just downloaded. Drag it in or browse.</p>
+    <div class="uploadbox" id="cd-drop">
+      <div style="font-size:30px">&#128193;</div>
+      <div style="font-weight:600;margin-top:6px">Drop your C-CDA zip here, or click to browse</div>
+      <div class="muted" style="font-size:11.5px;margin-top:4px">Accepts .zip or .xml from any patient portal</div>
+      <input type="file" id="cd-file" accept=".zip,.xml" class="hide">
+    </div>
+    <div id="cd-filename" class="mt"></div>`,
+  ()=>`<h3>Step 5. Parsed and mapped</h3>
+    <p class="muted">The registry reads the C-CDA sections and maps them to fields, exactly like the live connection. Documents are kept; coded extractions are flagged for staff review.</p>
+    <div id="cd-feed"></div>`
+];
+const CD_FEED=[
+  ['C-CDA: Problems section (SNOMED / ICD-10)','primary_site [400], laterality [410]','3 problems'],
+  ['C-CDA: Medications section (RxNorm)','rx_chemo [1390], rx_hormone [1400]','9 medications'],
+  ['C-CDA: Results section (LOINC)','ehr_labs, er_summary [3827]','118 results'],
+  ['C-CDA: Procedures section (CPT)','rx_surgery [1290], rx_radiation [1360]','6 procedures'],
+  ['C-CDA: Encounters section','last_contact [1750]','22 encounters'],
+  ['Embedded pathology note -> NLP','histology [522], summary_stage [764] (pending review)','derived']
+];
+function renderCdStage(){
+  const steps=$('#cdstep').children;
+  [...steps].forEach((s,i)=>{s.className='st'+(i<cdIdx?' done':i===cdIdx?' active':'');});
+  $('#cdstage').innerHTML=cdStages[cdIdx]();
+  const n2=$('#cdnext2'); if(n2) n2.onclick=()=>advanceCd(1);
+  if(cdIdx===3){
+    const drop=$('#cd-drop'), file=$('#cd-file');
+    if(drop&&file){
+      drop.onclick=()=>file.click();
+      file.onchange=()=>{ if(file.files[0]){ $('#cd-filename').innerHTML=`<div class="note"><b>Received:</b> ${esc(file.files[0].name)} (${Math.max(1,Math.round(file.files[0].size/1024))} KB). Ready to parse.</div>`; setTimeout(()=>advanceCd(1),700); } };
+      drop.ondragover=e=>{e.preventDefault();drop.style.background='#f0e9db';};
+      drop.ondragleave=()=>{drop.style.background='';};
+      drop.ondrop=e=>{e.preventDefault();drop.style.background='';$('#cd-filename').innerHTML=`<div class="note"><b>Received:</b> ${esc((e.dataTransfer.files[0]||{}).name||'MyRecord_CCDA.zip')}. Ready to parse.</div>`;setTimeout(()=>advanceCd(1),700);};
+    }
+  }
+  if(cdIdx===4) playFeed('cd-feed',CD_FEED);
+}
+function advanceCd(d){ cdIdx=Math.max(0,Math.min(cdStages.length-1,cdIdx+d)); renderCdStage(); }
+
+/* ---- Harmonized cross-source dictionary ---- */
+VIEWS.harmonized = ()=>{
+  let curDom='';
+  const rows = HARMON.map(el=>{
+    let sec='';
+    if(el.domain!==curDom){curDom=el.domain;sec=`<tr><td colspan="6" style="background:#f3f0ea;font-weight:700;color:#7a1414">${esc(el.domain)}</td></tr>`;}
+    return `${sec}<tr>
+      <td><b>${esc(el.label)}</b></td>
+      <td class="fname" style="font-family:Consolas,monospace;font-size:11px;color:#7a1414">${esc(el.name)}</td>
+      <td><span class="ftype">${FTYPE_LABEL[el.type]||el.type}</span></td>
+      <td>${srcBadges(el)}</td>
+      <td class="center" style="font-size:11px">${esc(srcWhich(el))}</td>
+      <td class="center">${provBadge(el.prov)}</td>
+    </tr>`;
+  }).join('');
+  const nN=HARMON.filter(e=>e.naaccr).length, nC=HARMON.filter(e=>e.nci).length, nA=HARMON.filter(e=>e.aou).length;
+  const nBoth=HARMON.filter(e=>[e.naaccr,e.nci,e.aou].filter(Boolean).length>1).length;
+  return `
+    <div class="crumbs">Project Home and Design &rsaquo; <b>Harmonized Data Dictionary</b></div>
+    <h2>Harmonized Data Dictionary</h2>
+    <p class="muted" style="max-width:840px">
+      One dictionary reconciled across three standards, with the source named on every element. This is the
+      adaptable starting point: download it as a REDCap data dictionary, delete what you do not need, add your own,
+      and import it into your own REDCap project.
+    </p>
+    <div class="cards">
+      <div class="card"><h4>Elements</h4><div class="big">${HARMON.length}</div><div class="sub">harmonized cross-section</div></div>
+      <div class="card"><h4>NAACCR</h4><div class="big">${nN}</div><div class="sub">with verified item number</div></div>
+      <div class="card"><h4>NCI caDSR</h4><div class="big">${nC}</div><div class="sub">CDE / NCIt aligned</div></div>
+      <div class="card"><h4>All of Us</h4><div class="big">${nA}</div><div class="sub">PPI survey module</div></div>
+    </div>
+    <div class="flexrow mb">
+      <a class="btn" id="dl-harmon">&#8681; Download adaptable REDCap dictionary (CSV)</a>
+      <span class="muted" style="font-size:11.5px">${nBoth} elements align to more than one standard</span>
+    </div>
+    <div class="legend"><b>Source key:</b>
+      <span class="src naaccr">NAACCR ###</span> cancer registry item &nbsp;
+      <span class="src nci">NCI caDSR</span> CDE / NCIt &nbsp;
+      <span class="src aou">AoU: module</span> All of Us survey &nbsp;
+      <span class="src local">This project</span> no external standard
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Element</th><th>Variable</th><th>Type</th><th>Source standard(s)</th><th>Attribution</th><th>Captured by</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <h3 class="mt">Sources and how each was used</h3>
+    <table style="max-width:880px">
+      <thead><tr><th>Standard</th><th>What it provides here</th><th>Citation</th></tr></thead>
+      <tbody>
+        <tr><td><span class="src naaccr">NAACCR</span></td><td>Cancer identification, staging, SSDIs, treatment, follow-up, with verified item numbers</td><td class="muted" style="font-size:11px">${esc(SRC_CITE.naaccr)}</td></tr>
+        <tr><td><span class="src nci">NCI caDSR</span></td><td>CDE definitions and NCIt concepts for demographics, diagnosis, labs, pathology, treatment, and PRO measures. caDSR II can export a form directly as a REDCap data dictionary.</td><td class="muted" style="font-size:11px">${esc(SRC_CITE.nci)}</td></tr>
+        <tr><td><span class="src aou">All of Us</span></td><td>Participant-provided survey content: demographics, lifestyle, overall health, personal and family history, healthcare access, and social drivers of health</td><td class="muted" style="font-size:11px">${esc(SRC_CITE.aou)}</td></tr>
+        <tr><td><span class="src local">This project</span></td><td>CAM and supplement items, which none of the three standards cover in this form</td><td class="muted" style="font-size:11px">${esc(SRC_CITE.local)}</td></tr>
+      </tbody>
+    </table>
+    <div class="note mt">
+      <b>Scope, stated plainly.</b> NCI caDSR holds tens of thousands of CDEs and the All of Us dictionaries ship
+      thousands of fields per release. This is a verified, oncology-relevant cross-section, not the full content of
+      either. NAACCR item numbers are verified; NCI alignment is named at the caDSR / NCIt level and the exact CDE
+      Public ID should be pulled from the caDSR II CDE Browser; All of Us elements are attributed to their PPI survey
+      module in CDR v8. Treat anything beyond the NAACCR numbers as a mapping to confirm against the live source.
+    </div>
+  `;
+};
+
 /* ---- Dashboard ---- */
 VIEWS.dashboard = ()=>{
   const insts=INSTRUMENTS;
@@ -1011,7 +1308,13 @@ VIEWS.about = ()=>`
     <li>The FHIR resource types, scopes, and code systems are the ones a real connection would use.</li>
     <li>The structured-first, documents-second sequence reflects how patient-mediated ingestion actually behaves.</li>
   </ul>
-  <p class="muted mt">Not affiliated with REDCap or Vanderbilt University. Built as a discussion and demonstration artifact.</p>
+  <h3 class="mt">Standards and sources cited</h3>
+  <ul style="font-size:12.5px;max-width:780px">
+    <li><b>NAACCR</b> Data Standards and Data Dictionary, Volume II. Item numbers verified at apps.naaccr.org.</li>
+    <li><b>NCI caDSR II / NCI Thesaurus</b> (cadsr.cancer.gov). ISO/IEC 11179 metadata registry; caDSR II can export forms as REDCap data dictionaries. Exact CDE Public IDs are obtained from the caDSR II CDE Browser.</li>
+    <li><b>All of Us</b> CDR Data Dictionary v8, participant-provided information survey modules (support.researchallofus.org).</li>
+  </ul>
+  <p class="muted mt">Not affiliated with REDCap or Vanderbilt University, NAACCR, NCI, or the All of Us Research Program. Built as a discussion and demonstration artifact. Standards content is attributed to its source on the Harmonized Data Dictionary screen.</p>
 `;
 
 /* ============================================================
@@ -1052,6 +1355,13 @@ function bind(view){
     $('#cnext').onclick=()=>advanceConnect(1);
     $('#cback').onclick=()=>advanceConnect(-1);
   }
+  // C-CDA download/upload flow
+  if(view==='ccda'){cdIdx=0;renderCdStage();
+    $('#cdnext').onclick=()=>advanceCd(1);
+    $('#cdback').onclick=()=>advanceCd(-1);
+  }
+  // harmonized dictionary download
+  const dh=$('#dl-harmon'); if(dh) dh.onclick=()=>downloadFile('OncoRegistry_Harmonized_REDCap_DataDictionary.csv',harmonToCSV());
   // export csv
   const csv=$('#dl-csv'); if(csv) csv.onclick=()=>downloadFile('OncoRegistry_export.csv',recordsToCSV());
   // any in-content data-view links
