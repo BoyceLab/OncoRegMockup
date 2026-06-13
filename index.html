@@ -178,6 +178,10 @@ tr:nth-child(even) td{background:#fbfaf8}
 .bar-row .fill{height:100%;background:var(--maroon);border-radius:3px}
 .bar-row .v{width:34px;font-weight:600;color:#333}
 
+.searchbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.searchbar input[type=text]{flex:1;min-width:220px;padding:8px 10px;border:1px solid #bbb;border-radius:5px;font-family:var(--sans);font-size:13px}
+.searchbar select{padding:7px;border:1px solid #bbb;border-radius:5px;font-family:var(--sans);font-size:12.5px;background:#fff}
+.rescount{font-size:12px;color:var(--muted);margin:4px 0 8px}
 .hide{display:none}
 .muted{color:var(--muted)}
 .center{text-align:center}
@@ -224,6 +228,7 @@ tr:nth-child(even) td{background:#fbfaf8}
       <a class="nav" data-view="setup"><span class="ic">&#9776;</span>Project Setup</a>
       <a class="nav" data-view="designer"><span class="ic">&#9998;</span>Online Designer</a>
       <a class="nav" data-view="dictionary"><span class="ic">&#9783;</span>Data Dictionary</a>
+      <a class="nav" data-view="browse"><span class="ic">&#128269;</span>Browse &amp; Search</a>
       <a class="nav" data-view="harmonized"><span class="ic">&#9776;</span>Harmonized Dictionary</a>
       <a class="nav" data-view="cadsr"><span class="ic">&#9873;</span>NCI caDSR CDEs</a>
     </div>
@@ -411,7 +416,7 @@ const NAACCR_CROSSWALK = [
    HARMONIZED CROSS-SOURCE DICTIONARY
    Reconciles three standards. Source attribution per element:
      naaccr -> NAACCR item number (verified, apps.naaccr.org)
-     nci    -> NCI caDSR II CDE / NCI Thesaurus (cadsr.cancer.gov; Public ID via CDE Browser)
+     nci    -> NCI caDSR II CDE / NCI Thesaurus (cadsr.cancer.gov; Public ID via caDSR II)
      aou    -> All of Us CDR Data Dictionary v8 PPI survey module (support.researchallofus.org)
      local  -> Defined for this project (no external standard)
    fields: domain,label,name,type,choices,naaccr,nci,aou,prov
@@ -486,11 +491,11 @@ const HARMON = [
   {domain:'Access & Social Drivers',label:'Transportation barrier to care',name:'transport',type:'yesno',choices:'',naaccr:'',nci:false,aou:'Social Determinants of Health',prov:'survey'},
   {domain:'Access & Social Drivers',label:'Social support availability',name:'social_support',type:'radio',choices:'1, None of the time | 2, Some of the time | 3, Most of the time | 4, All of the time',naaccr:'',nci:false,aou:'Social Determinants of Health',prov:'survey'},
 
-  // NCI caDSR: Patient Reported Outcomes (PRO-CTCAE). NCI standard; item-level CDE Public IDs in the caDSR CDE Browser.
-  {domain:'PRO-CTCAE (NCI)',label:'Nausea, frequency (PRO-CTCAE)',name:'proctcae_nausea_freq',type:'radio',choices:'0, Never | 1, Rarely | 2, Occasionally | 3, Frequently | 4, Almost constantly',naaccr:'',nci:true,ncicde:'PRO-CTCAE; CDE via caDSR CDE Browser',aou:'',prov:'survey'},
-  {domain:'PRO-CTCAE (NCI)',label:'Fatigue, severity (PRO-CTCAE)',name:'proctcae_fatigue_sev',type:'radio',choices:'0, None | 1, Mild | 2, Moderate | 3, Severe | 4, Very severe',naaccr:'',nci:true,ncicde:'PRO-CTCAE; CDE via caDSR CDE Browser',aou:'',prov:'survey'},
-  {domain:'PRO-CTCAE (NCI)',label:'Pain, interference (PRO-CTCAE)',name:'proctcae_pain_int',type:'radio',choices:'0, Not at all | 1, A little bit | 2, Somewhat | 3, Quite a bit | 4, Very much',naaccr:'',nci:true,ncicde:'PRO-CTCAE; CDE via caDSR CDE Browser',aou:'',prov:'survey'},
-  {domain:'PRO-CTCAE (NCI)',label:'Anxiety, frequency (PRO-CTCAE)',name:'proctcae_anxiety_freq',type:'radio',choices:'0, Never | 1, Rarely | 2, Occasionally | 3, Frequently | 4, Almost constantly',naaccr:'',nci:true,ncicde:'PRO-CTCAE; CDE via caDSR CDE Browser',aou:'',prov:'survey'},
+  // NCI caDSR: Patient Reported Outcomes (PRO-CTCAE). NCI standard; item-level CDE Public IDs in the caDSR II.
+  {domain:'PRO-CTCAE (NCI)',label:'Nausea, frequency (PRO-CTCAE)',name:'proctcae_nausea_freq',type:'radio',choices:'0, Never | 1, Rarely | 2, Occasionally | 3, Frequently | 4, Almost constantly',naaccr:'',nci:true,ncicde:'PRO-CTCAE; CDE via caDSR II',aou:'',prov:'survey'},
+  {domain:'PRO-CTCAE (NCI)',label:'Fatigue, severity (PRO-CTCAE)',name:'proctcae_fatigue_sev',type:'radio',choices:'0, None | 1, Mild | 2, Moderate | 3, Severe | 4, Very severe',naaccr:'',nci:true,ncicde:'PRO-CTCAE; CDE via caDSR II',aou:'',prov:'survey'},
+  {domain:'PRO-CTCAE (NCI)',label:'Pain, interference (PRO-CTCAE)',name:'proctcae_pain_int',type:'radio',choices:'0, Not at all | 1, A little bit | 2, Somewhat | 3, Quite a bit | 4, Very much',naaccr:'',nci:true,ncicde:'PRO-CTCAE; CDE via caDSR II',aou:'',prov:'survey'},
+  {domain:'PRO-CTCAE (NCI)',label:'Anxiety, frequency (PRO-CTCAE)',name:'proctcae_anxiety_freq',type:'radio',choices:'0, Never | 1, Rarely | 2, Occasionally | 3, Frequently | 4, Almost constantly',naaccr:'',nci:true,ncicde:'PRO-CTCAE; CDE via caDSR II',aou:'',prov:'survey'},
 
   // NCI caDSR: Drug repurposing / medication exposure. Concomitant Medication NCI CRF Standard, caDSR Public ID 2867231.
   {domain:'Drug Repurposing / Medications (NCI)',label:'Concomitant medication name',name:'conmed_name',type:'text',choices:'',naaccr:'',nci:true,ncicde:'caDSR Form 2867231 (Concomitant Medication NCI CRF)',aou:'',prov:'both'},
@@ -500,14 +505,14 @@ const HARMON = [
   {domain:'Drug Repurposing / Medications (NCI)',label:'Start date',name:'conmed_start',type:'text',choices:'',naaccr:'',nci:true,ncicde:'caDSR Form 2867231',aou:'',prov:'both'},
   {domain:'Drug Repurposing / Medications (NCI)',label:'Still taking',name:'conmed_ongoing',type:'yesno',choices:'',naaccr:'',nci:true,ncicde:'caDSR Form 2867231',aou:'',prov:'both'},
   {domain:'Drug Repurposing / Medications (NCI)',label:'Use is off-label / repurposed',name:'repurpose_flag',type:'yesno',choices:'',naaccr:'',nci:true,ncicde:'caDSR Form 2867231 (extended for repurposing)',aou:'',prov:'both',local:true},
-  {domain:'Drug Repurposing / Medications (NCI)',label:'Prior cancer therapy agent',name:'prior_therapy_agent',type:'text',choices:'',naaccr:'',nci:true,ncicde:'caDSR; Prior Therapy CDEs via CDE Browser',aou:'',prov:'both'},
+  {domain:'Drug Repurposing / Medications (NCI)',label:'Prior cancer therapy agent',name:'prior_therapy_agent',type:'text',choices:'',naaccr:'',nci:true,ncicde:'caDSR; Prior Therapy CDEs via caDSR II',aou:'',prov:'both'},
   {domain:'Drug Repurposing / Medications (NCI)',label:'Adverse event term (CTCAE)',name:'ae_ctcae_term',type:'text',choices:'',naaccr:'',nci:true,ncicde:'caDSR Form 3265657 (CTCAE v4 NCI CRF)',aou:'',prov:'both'}
 ];
 
 // Source citation strings
 const SRC_CITE = {
   naaccr:'NAACCR Data Standards and Data Dictionary, Vol. II (apps.naaccr.org). Item numbers verified.',
-  nci:'NCI caDSR II CDE / NCI Thesaurus (cadsr.cancer.gov). Exact CDE Public ID via the caDSR II CDE Browser.',
+  nci:'NCI caDSR II CDE / NCI Thesaurus (cadsr.cancer.gov). Exact CDE Public ID via the caDSR II.',
   aou:'All of Us CDR Data Dictionary v8, PPI survey modules (support.researchallofus.org).',
   local:'Defined for this project; no external standard source.'
 };
@@ -548,8 +553,69 @@ function harmonToCSV(){
   return lines.join('\n');
 }
 
-// Mock records for dashboard / export
-const STATUS = ['g','y','r','x'];
+/* ============================================================
+   MASTER CATALOG  (searchable, mirrors the workbook)
+   Union of instrument fields + harmonized extras, deduped by variable.
+   ============================================================ */
+const U_NAACCR_DD='https://apps.naaccr.org/data-dictionary/';
+const U_CDEBROWSER='https://cadsr.cancer.gov/';
+const U_AOU_BASICS_R='https://support.researchallofus.org/hc/en-us/articles/6085285773204-The-Basics-Baseline-Survey-Details-and-Resources';
+const U_AOU_EXPLORER_R='https://www.researchallofus.org/data-tools/survey-explorer/';
+function naaccrUrl(item){return /^\d+$/.test(String(item))?`https://apps.naaccr.org/data-dictionary/data-dictionary/version=25/data-item-view/item-number=${item}/`:U_NAACCR_DD;}
+function urlFor(naaccr,ncicde,aou){
+  if(naaccr && /^\d+$/.test(String(naaccr))) return naaccrUrl(naaccr);
+  if(ncicde) return U_CDEBROWSER;
+  if(aou) return /Basics/.test(aou)?U_AOU_BASICS_R:U_AOU_EXPLORER_R;
+  if(naaccr) return U_NAACCR_DD;
+  return '';
+}
+function sourceSet(naaccr,nci,aou,local){
+  const s=[];
+  if(naaccr)s.push('NAACCR'); if(nci)s.push('NCI caDSR'); if(aou)s.push('All of Us');
+  if(local||(!naaccr&&!nci&&!aou))s.push('Project');
+  return s.length>1?'Both: '+s.join(' + '):s[0];
+}
+function buildMaster(){
+  const harMap={}; HARMON.forEach(el=>harMap[el.name]=el);
+  const ddNames=new Set(DD.map(f=>f.name));
+  const out=[];
+  DD.forEach(f=>{
+    if(f.name==='record_id') return;
+    const h=harMap[f.name];
+    const naaccr=f.naaccr||(h&&h.naaccr)||'';
+    const nci=(h&&h.nci)?true:(!!f.anno&&/NCI/.test(f.anno));
+    const ncicde=(h&&h.ncicde)||'';
+    const aou=f.aou||(h&&h.aou)||'';
+    const notes=[f.note,f.anno].filter(Boolean).join('; ');
+    out.push({domain:instrument(f.form)?instrument(f.form).name:f.form,label:f.label,name:f.name,type:f.type,
+      choices:f.choices||'',naaccr:naaccr,nci:nci,ncicde:ncicde,aou:aou,prov:f.prov||'',branch:f.branch||'',
+      notes:notes,origin:'Instrument',url:urlFor(naaccr,ncicde,aou),sourceSet:sourceSet(naaccr,nci,aou,false)});
+  });
+  HARMON.forEach(el=>{
+    if(ddNames.has(el.name)) return;
+    out.push({domain:el.domain,label:el.label,name:el.name,type:el.type,choices:el.choices||'',
+      naaccr:el.naaccr||'',nci:!!el.nci,ncicde:el.ncicde||'',aou:el.aou||'',prov:el.prov||'',branch:'',
+      notes:'',origin:'Catalog (addable)',url:urlFor(el.naaccr,el.ncicde,el.aou),
+      sourceSet:sourceSet(el.naaccr,el.nci,el.aou,el.local)});
+  });
+  return out;
+}
+const MASTER=buildMaster();
+function masterBadges(m){
+  const b=[];
+  if(m.naaccr) b.push(`<span class="src naaccr">NAACCR ${esc(m.naaccr)}</span>`);
+  if(m.nci) b.push(`<span class="src nci">NCI caDSR</span>`);
+  if(m.aou) b.push(`<span class="src aou">AoU: ${esc(m.aou)}</span>`);
+  if(!m.naaccr&&!m.nci&&!m.aou) b.push(`<span class="src local">Project</span>`);
+  return b.join('');
+}
+function masterToCSV(rows){
+  const cols=['Domain','Element','Variable','Type','Choices','NAACCR_item','NCI_caDSR','caDSR_ref','AllOfUs_module','Source_set','Captured_by','Branching','Notes','Origin','Source_URL'];
+  const q=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const lines=[cols.join(',')];
+  rows.forEach(m=>lines.push([m.domain,m.label,m.name,m.type,m.choices,m.naaccr,m.nci?'Yes':'',m.ncicde,m.aou,m.sourceSet,PROV_LABEL[m.prov]||'',m.branch,m.notes,m.origin,m.url].map(q).join(',')));
+  return lines.join('\n');
+}
 const SITES = ['Breast','Lung','Colorectal','Prostate','Lymphoma','Pancreatic','Ovarian','Melanoma'];
 function mkRecords(){
   const recs=[];
@@ -647,6 +713,7 @@ VIEWS.home = ()=>`
     <li><a data-view="mapping">Clinical Data Mapping</a>: how raw FHIR becomes registry fields.</li>
     <li><a data-view="naaccr">NAACCR Crosswalk</a>: which standard cancer registry items come from EHR, survey, or both.</li>
     <li><a data-view="harmonized">Harmonized Dictionary</a> and <a data-view="cadsr">NCI caDSR CDEs</a>: one dictionary reconciled across NAACCR, NCI, and All of Us, with links to expand it and a downloadable REDCap file.</li>
+    <li><a data-view="browse">Browse &amp; Search</a>: filter the full catalog of every element by source, domain, and capture method, with links to each source.</li>
     <li><a data-view="dashboard">Dashboard</a>, <a data-view="reports">Visualizations</a>, and <a data-view="export">Exports</a>.</li>
   </ul>
 `;
@@ -871,9 +938,9 @@ function resourcesPanel(){
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
       <div><span class="src naaccr">NAACCR</span><div style="font-size:12px;margin-top:3px">Full item list and codes</div>
         <a href="https://apps.naaccr.org/data-dictionary/" target="_blank" rel="noopener">apps.naaccr.org/data-dictionary</a></div>
-      <div><span class="src nci">NCI caDSR</span><div style="font-size:12px;margin-top:3px">CDE Browser, exact Public IDs</div>
+      <div><span class="src nci">NCI caDSR</span><div style="font-size:12px;margin-top:3px">Search CDEs, exact Public IDs</div>
         <a href="https://cadsr.cancer.gov/" target="_blank" rel="noopener">cadsr.cancer.gov</a> &middot;
-        <a href="https://cdebrowser.nci.nih.gov/" target="_blank" rel="noopener">CDE Browser</a></div>
+        <a href="https://cadsr.cancer.gov/" target="_blank" rel="noopener">Search CDEs</a></div>
       <div><span class="src nci">NCI caDSR API</span><div style="font-size:12px;margin-top:3px">Query CDEs and export forms</div>
         <a href="https://cadsrapi.cancer.gov/" target="_blank" rel="noopener">cadsrapi.cancer.gov</a></div>
       <div><span class="src aou">All of Us</span><div style="font-size:12px;margin-top:3px">Survey Explorer and CDR dictionaries</div>
@@ -1207,6 +1274,7 @@ VIEWS.harmonized = ()=>{
     </div>
     <div class="flexrow mb">
       <a class="btn" id="dl-harmon">&#8681; Download adaptable REDCap dictionary (CSV)</a>
+      <a class="btn sec" href="OncoRegistry_DataDictionary_Workbook.xlsx" download>&#8681; Full workbook (Excel)</a>
       <span class="muted" style="font-size:11.5px">${nBoth} elements align to more than one standard</span>
     </div>
     <div class="legend"><b>Source key:</b>
@@ -1235,7 +1303,7 @@ VIEWS.harmonized = ()=>{
       <b>Scope, stated plainly.</b> NCI caDSR holds tens of thousands of CDEs and the All of Us dictionaries ship
       thousands of fields per release. This is a verified, oncology-relevant cross-section, not the full content of
       either. NAACCR item numbers are verified; NCI alignment is named at the caDSR / NCIt level and the exact CDE
-      Public ID should be pulled from the caDSR II CDE Browser; All of Us elements are attributed to their PPI survey
+      Public ID should be pulled from the caDSR II; All of Us elements are attributed to their PPI survey
       module in CDR v8. Treat anything beyond the NAACCR numbers as a mapping to confirm against the live source.
     </div>
     ${resourcesPanel()}
@@ -1249,7 +1317,7 @@ VIEWS.cadsr = ()=>{
   const row = e=>`<tr>
     <td><b>${esc(e.label)}</b></td>
     <td class="fname" style="font-family:Consolas,monospace;font-size:11px;color:#7a1414">${esc(e.name)}</td>
-    <td style="font-size:11px">${esc(e.ncicde||'caDSR CDE Browser')}</td>
+    <td style="font-size:11px">${esc(e.ncicde||'caDSR II')}</td>
     <td class="center">${provBadge(e.prov)}</td>
   </tr>`;
   return `
@@ -1258,7 +1326,7 @@ VIEWS.cadsr = ()=>{
     <p class="muted" style="max-width:840px">
       Elements drawn from NCI's Cancer Data Standards Registry and Repository (caDSR), the registry of Common Data
       Elements built on ISO/IEC 11179 with concepts from the NCI Thesaurus. The Public IDs below are real caDSR form
-      identifiers; item-level CDE Public IDs are retrieved from the CDE Browser. caDSR can export any of these forms
+      identifiers; item-level CDE Public IDs are retrieved from caDSR II. caDSR can export any of these forms
       directly as a REDCap data dictionary.
     </p>
 
@@ -1283,17 +1351,96 @@ VIEWS.cadsr = ()=>{
         <tr><td><span class="naaccr">2867231</span></td><td>Concomitant Medication NCI CRF</td><td>Medication and repurposing exposure fields</td></tr>
         <tr><td><span class="naaccr">3265657</span></td><td>Adverse Event / SAE CTCAE v4 NCI CRF</td><td>Safety / adverse event capture</td></tr>
         <tr><td><span class="naaccr">2748814</span></td><td>Adverse Event / SAE CTCAE v3 NCI CRF</td><td>Legacy adverse event capture</td></tr>
-        <tr><td><span class="src nci">PRO-CTCAE</span></td><td>NCI PRO measurement system</td><td>Patient-reported symptom items; item CDEs via CDE Browser</td></tr>
+        <tr><td><span class="src nci">PRO-CTCAE</span></td><td>NCI PRO measurement system</td><td>Patient-reported symptom items; item CDEs via caDSR II</td></tr>
       </tbody>
     </table>
     <p class="muted" style="font-size:11px;margin-top:8px">
       Form Public IDs verified from the caDSR Data Standards and Downloads listing (wiki.nci.nih.gov). PRO-CTCAE item
       counts from NCI DCCPS (cancercontrol.cancer.gov). Individual CDE Public IDs were not pinned here and should be
-      confirmed in the caDSR II CDE Browser.
+      confirmed in the caDSR II.
     </p>
     ${resourcesPanel()}
   `;
 };
+
+/* ---- Browse / Search the Dictionary ---- */
+VIEWS.browse = ()=>{
+  const domains=[...new Set(MASTER.map(m=>m.domain))].sort();
+  return `
+    <div class="crumbs">Project Home and Design &rsaquo; <b>Browse &amp; Search Dictionary</b></div>
+    <h2>Browse and Search the Data Dictionary</h2>
+    <p class="muted" style="max-width:820px">
+      Every element from every source in one place. Type to search across labels, variables, codes, and notes, or
+      narrow by source, domain, and how the data are captured. Each row links out to its authoritative source.
+    </p>
+    <div class="searchbar">
+      <input type="text" id="bq" placeholder="Search elements, variables, NAACCR numbers, modules...">
+      <select id="bsrc">
+        <option value="">All sources</option>
+        <option value="NAACCR">NAACCR</option>
+        <option value="NCI caDSR">NCI caDSR</option>
+        <option value="All of Us">All of Us</option>
+        <option value="Project">Project only</option>
+      </select>
+      <select id="bdom"><option value="">All domains</option>${domains.map(d=>`<option>${esc(d)}</option>`).join('')}</select>
+      <select id="bcap">
+        <option value="">Any capture</option>
+        <option value="ehr">EHR</option>
+        <option value="survey">Survey</option>
+        <option value="both">EHR + Survey</option>
+        <option value="derived">Derived</option>
+      </select>
+      <a class="btn sm" id="b-csv">&#8681; CSV</a>
+      <a class="btn sm sec" href="OncoRegistry_DataDictionary_Workbook.xlsx" download>&#8681; Full workbook (Excel)</a>
+    </div>
+    <div class="rescount" id="bcount"></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Domain</th><th>Element</th><th>Variable</th><th>Type</th><th>Source(s)</th>
+          <th>Captured by</th><th>Choices / values</th><th>Source</th>
+        </tr></thead>
+        <tbody id="brows"></tbody>
+      </table>
+    </div>
+    <div class="note mt">
+      Showing the full harmonized catalog of ${MASTER.length} elements. Download the complete multi-sheet
+      <a href="OncoRegistry_DataDictionary_Workbook.xlsx" download>Excel workbook</a> for an offline, sortable copy
+      with per-source sheets and a REDCap import template. To pull additional elements or exact identifiers, use the
+      <a data-view="harmonized">source links</a> on the Harmonized screen.
+    </div>
+  `;
+};
+function renderBrowse(){
+  const q=($('#bq').value||'').toLowerCase().trim();
+  const src=$('#bsrc').value, dom=$('#bdom').value, cap=$('#bcap').value;
+  const rows=MASTER.filter(m=>{
+    if(dom && m.domain!==dom) return false;
+    if(cap && m.prov!==cap) return false;
+    if(src){
+      if(src==='NAACCR' && !m.naaccr) return false;
+      if(src==='NCI caDSR' && !m.nci) return false;
+      if(src==='All of Us' && !m.aou) return false;
+      if(src==='Project' && (m.naaccr||m.nci||m.aou)) return false;
+    }
+    if(q){
+      const hay=[m.domain,m.label,m.name,m.type,m.choices,m.naaccr,m.ncicde,m.aou,m.notes,m.sourceSet].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  $('#bcount').textContent=`${rows.length} of ${MASTER.length} elements`;
+  $('#brows').innerHTML=rows.map(m=>`<tr>
+    <td>${esc(m.domain)}</td>
+    <td><b>${esc(m.label)}</b>${m.notes?`<div class="muted" style="font-size:10px">${esc(m.notes)}</div>`:''}</td>
+    <td class="fname" style="font-family:Consolas,monospace;font-size:11px;color:#7a1414">${esc(m.name)}</td>
+    <td><span class="ftype">${FTYPE_LABEL[m.type]||m.type}</span></td>
+    <td>${masterBadges(m)}${m.ncicde?`<div class="muted" style="font-size:10px;margin-top:2px">${esc(m.ncicde)}</div>`:''}</td>
+    <td>${provBadge(m.prov)}</td>
+    <td style="max-width:240px;font-size:11px">${esc(m.choices||'')}</td>
+    <td>${m.url?`<a href="${esc(m.url)}" target="_blank" rel="noopener">open</a>`:'<span class="muted">—</span>'}</td>
+  </tr>`).join('') || `<tr><td colspan="8" class="muted center" style="padding:18px">No elements match. Clear the search or widen the filters.</td></tr>`;
+}
 
 /* ---- Dashboard ---- */
 VIEWS.dashboard = ()=>{
@@ -1437,7 +1584,7 @@ VIEWS.about = ()=>`
   <h3 class="mt">Standards and sources cited</h3>
   <ul style="font-size:12.5px;max-width:800px">
     <li><b>NAACCR</b> Data Standards and Data Dictionary, Volume II. Item numbers verified at apps.naaccr.org.</li>
-    <li><b>NCI caDSR II / NCI Thesaurus</b> (cadsr.cancer.gov; cdebrowser.nci.nih.gov; cadsrapi.cancer.gov). Verified caDSR form Public IDs used here: Concomitant Medication NCI CRF (2867231), CTCAE v4 NCI CRF (3265657), CTCAE v3 (2748814). PRO-CTCAE (124 items, 78 symptoms) per NCI DCCPS. Item-level CDE Public IDs are obtained from the CDE Browser. caDSR can export forms as REDCap data dictionaries.</li>
+    <li><b>NCI caDSR II / NCI Thesaurus</b> (cadsr.cancer.gov; cadsrapi.cancer.gov). Verified caDSR form Public IDs used here: Concomitant Medication NCI CRF (2867231), CTCAE v4 NCI CRF (3265657), CTCAE v3 (2748814). PRO-CTCAE (124 items, 78 symptoms) per NCI DCCPS. Item-level CDE Public IDs are obtained from caDSR II. caDSR can export forms as REDCap data dictionaries.</li>
     <li><b>All of Us</b> CDR Data Dictionary v8 and the PPI survey "The Basics" (73 items; sources include NHANES, US Census, NHIS, BRFSS, GenIUSS, ACS, UK Biobank). support.researchallofus.org and researchallofus.org.</li>
   </ul>
   <p class="muted mt">Not affiliated with REDCap or Vanderbilt University, NAACCR, NCI, or the All of Us Research Program. Built as a discussion and demonstration artifact. Standards content is attributed to its source on the Harmonized Data Dictionary and NCI caDSR screens.</p>
@@ -1488,6 +1635,12 @@ function bind(view){
   }
   // harmonized dictionary download
   const dh=$('#dl-harmon'); if(dh) dh.onclick=()=>downloadFile('OncoRegistry_Harmonized_REDCap_DataDictionary.csv',harmonToCSV());
+  // browse / search dictionary
+  if(view==='browse'){
+    renderBrowse();
+    ['bq','bsrc','bdom','bcap'].forEach(id=>{const e=$('#'+id); if(e){e.addEventListener('input',renderBrowse);e.addEventListener('change',renderBrowse);}});
+    const bc=$('#b-csv'); if(bc) bc.onclick=()=>downloadFile('OncoRegistry_Catalog.csv',masterToCSV(MASTER));
+  }
   // export csv
   const csv=$('#dl-csv'); if(csv) csv.onclick=()=>downloadFile('OncoRegistry_export.csv',recordsToCSV());
   // any in-content data-view links
