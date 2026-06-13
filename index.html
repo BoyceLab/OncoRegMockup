@@ -182,6 +182,25 @@ tr:nth-child(even) td{background:#fbfaf8}
 .searchbar input[type=text]{flex:1;min-width:220px;padding:8px 10px;border:1px solid #bbb;border-radius:5px;font-family:var(--sans);font-size:13px}
 .searchbar select{padding:7px;border:1px solid #bbb;border-radius:5px;font-family:var(--sans);font-size:12.5px;background:#fff}
 .rescount{font-size:12px;color:var(--muted);margin:4px 0 8px}
+.demo{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.07);margin:8px 0 20px}
+.demo-head{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--maroon);color:#fff}
+.demo-eyebrow{font-size:10px;letter-spacing:1px;font-weight:700;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:9px}
+.demo-title{font-weight:700;font-size:14px;flex:1}
+.demo-controls a{color:#fff;font-size:15px;padding:0 5px;cursor:pointer;text-decoration:none;user-select:none}
+.demo-controls a:hover{opacity:.75;text-decoration:none}
+.demo-screen{position:relative;min-height:270px;padding:20px;background:linear-gradient(#fbfaf7,#f1ede4);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.demo-scene{width:100%;max-width:640px;animation:demofade .5s ease}
+@keyframes demofade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.demo-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;box-shadow:0 1px 5px rgba(0,0,0,.06)}
+.demo-hrow{padding:6px 9px;border:1px solid #eee;border-radius:6px;margin:5px 0;background:#fff;font-size:12.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.demo-hrow b{margin-right:auto}
+.demo-cap{padding:10px 14px;font-size:12.5px;color:#444;border-top:1px solid #eee;min-height:40px}
+.demo-foot{display:flex;align-items:center;gap:10px;padding:0 14px 10px}
+.demo-dots{display:flex;gap:6px;flex:1}
+.demo-dots span{width:8px;height:8px;border-radius:50%;background:#d8d2c4;cursor:pointer}
+.demo-dots span.on{background:var(--maroon)}
+.demo-progress{height:4px;background:#eee}
+.demo-progress>span{display:block;height:100%;width:0;background:var(--maroon)}
 .hide{display:none}
 .muted{color:var(--muted)}
 .center{text-align:center}
@@ -669,6 +688,133 @@ function choiceList(str){
    ============================================================ */
 const VIEWS={};
 
+/* ---- Embedded animated walkthrough (Project Home) ---- */
+function demoPlayer(){
+  return `
+  <div class="demo">
+    <div class="demo-head">
+      <span class="demo-eyebrow">GUIDED DEMO</span>
+      <span class="demo-title" id="demo-title">OncoRegistry</span>
+      <span class="demo-controls">
+        <a id="demo-prev" title="Previous">&#10094;</a>
+        <a id="demo-play" title="Play / pause">&#10073;&#10073;</a>
+        <a id="demo-next" title="Next">&#10095;</a>
+      </span>
+    </div>
+    <div class="demo-screen"><div id="demo-stage" style="width:100%"></div></div>
+    <div class="demo-cap" id="demo-cap"></div>
+    <div class="demo-foot">
+      <div class="demo-dots" id="demo-dots"></div>
+      <a class="btn sm sec" id="demo-open">Open this screen &rarr;</a>
+    </div>
+    <div class="demo-progress"><span id="demo-bar"></span></div>
+  </div>`;
+}
+
+const DEMO_SCENES=[
+  {title:'OncoRegistry', view:'home',
+   cap:'A patient-directed oncology registry. Here is the whole flow in under a minute.',
+   html:()=>`<div class="center"><div style="font-size:30px;color:#7a1414">&#9883;</div>
+     <div style="font-weight:800;font-size:20px;color:#7a1414;margin-top:4px">OncoRegistry in about a minute</div>
+     <p class="muted" style="max-width:470px;margin:6px auto">Surveys plus the participant's own electronic health record, mapped to NAACCR, NCI caDSR, and All of Us.</p></div>`},
+  {title:'1 \u00b7 Enroll and answer surveys', view:'survey_basics',
+   cap:'Participants consent and complete short surveys, including standardized All of Us Basics and PRO items.',
+   html:()=>`<div class="demo-card" style="max-width:470px;margin:0 auto">
+     <div style="font-weight:700;color:#7a1414;font-size:12px;margin-bottom:8px">Survey: The Basics (All of Us)</div>
+     <div style="font-weight:600;margin-bottom:7px">Highest grade or year of school completed?</div>
+     <label class="opt"><input type="radio" disabled> Grade 12 or GED</label>
+     <label class="opt demo-pick"><input type="radio" disabled> College 4 years or more</label>
+     <label class="opt"><input type="radio" disabled> Advanced degree</label></div>`,
+   anim:()=>{const p=document.querySelector('.demo-pick');if(p){const i=p.querySelector('input');setTimeout(()=>{if(i)i.checked=true;p.style.transition='background .3s';p.style.background='#eef6ee';},600);}}},
+  {title:'2 \u00b7 Authorize their own records', view:'connect',
+   cap:'With OAuth 2.0 and SMART on FHIR, the participant releases their EHR. No clinic data agreement required.',
+   html:()=>`<div class="demo-card" style="max-width:440px;margin:0 auto">
+     <div style="font-weight:700;margin-bottom:8px;color:#5a1a1a">OncoRegistry is requesting access</div>
+     <div id="demo-scopes">${[['Diagnoses and problem list','patient/Condition.read'],['Medications','patient/MedicationRequest.read'],['Labs and results','patient/Observation.read'],['Clinical documents','patient/DocumentReference.read']].map(s=>`<div class="scope"><input type="checkbox" disabled><div><b>${s[0]}</b><br><code>${s[1]}</code></div></div>`).join('')}</div>
+     <div class="btn" id="demo-allow" style="display:block;text-align:center;margin-top:10px">Allow</div></div>`,
+   anim:()=>{const b=[...document.querySelectorAll('#demo-scopes input')];b.forEach((x,i)=>setTimeout(()=>{x.checked=true;},300*(i+1)));const a=document.getElementById('demo-allow');if(a)setTimeout(()=>{a.style.transition='transform .25s';a.style.transform='scale(1.06)';setTimeout(()=>a.style.transform='none',260);},300*(b.length+1));}},
+  {title:'3 \u00b7 Structured data arrive', view:'connect',
+   cap:'Coded FHIR resources stream in and map to registry fields, the part most like existing clinical data interoperability.',
+   html:()=>`<div style="font-weight:700;color:#7a1414;font-size:12px;margin-bottom:6px">Structured FHIR resources arriving</div><div id="demo-feed1"></div>`,
+   anim:()=>demoStream('demo-feed1',[['Condition (SNOMED / ICD-10)','primary_site [400]'],['MedicationRequest (RxNorm)','rx_chemo [1390]'],['Observation: lab (LOINC)','er_summary [3827]'],['Procedure (CPT)','rx_surgery [1290]']])},
+  {title:'4 \u00b7 Documents and extraction', view:'ccda',
+   cap:'Pathology and notes arrive, then text processing extracts fields and flags them for review.',
+   html:()=>`<div style="font-weight:700;color:#7a1414;font-size:12px;margin-bottom:6px">Documents, then text extraction</div><div id="demo-feed2"></div>`,
+   anim:()=>demoStream('demo-feed2',[['Pathology report (DocumentReference)','doc_pathology'],['Oncology consult note','doc_oncology'],['NLP: histology extracted','histology [522] (review)'],['NLP: stage extracted','summary_stage [764] (review)']])},
+  {title:'5 \u00b7 Mapped to standards', view:'harmonized',
+   cap:'Every element is named to NAACCR, NCI caDSR, or All of Us, often more than one, with the source shown.',
+   html:()=>`<div style="font-weight:700;color:#7a1414;font-size:12px;margin-bottom:8px">One element, named to its standards</div>
+     <div class="demo-hrow"><b>Primary site</b><span class="src naaccr">NAACCR 400</span><span class="src nci">NCI caDSR</span></div>
+     <div class="demo-hrow"><b>Estrogen receptor</b><span class="src naaccr">NAACCR 3827</span><span class="src nci">NCI caDSR</span></div>
+     <div class="demo-hrow"><b>Education</b><span class="src aou">AoU: The Basics</span></div>
+     <div class="demo-hrow"><b>Fatigue (PRO-CTCAE)</b><span class="src nci">NCI caDSR</span></div>`,
+   anim:()=>demoReveal('.demo-hrow')},
+  {title:'6 \u00b7 Track and visualize', view:'reports',
+   cap:'A status dashboard and built-in charts update as records arrive.',
+   html:()=>`<div style="font-weight:700;color:#7a1414;font-size:12px;margin-bottom:8px">Primary cancer site</div>
+     ${[['Breast',8],['Lung',5],['Colorectal',4],['Prostate',3]].map(d=>`<div class="bar-row"><span class="lab">${d[0]}</span><span class="track"><span class="fill demo-bar2" data-w="${(d[1]/8*100).toFixed(0)}" style="width:0"></span></span><span class="v">${d[1]}</span></div>`).join('')}
+     <div style="margin-top:10px;font-size:11.5px"><span class="dot g"></span> complete <span class="dot y"></span> partial <span class="dot r"></span> pending</div>`,
+   anim:()=>{document.querySelectorAll('.demo-bar2').forEach((b,i)=>{b.style.transition='width .8s ease';setTimeout(()=>{b.style.width=b.dataset.w+'%';},140*(i+1));});}},
+  {title:'See it for yourself', view:'home',
+   cap:'Jump into any screen from the sidebar, or start with one of these.',
+   html:()=>`<div class="center"><div style="font-weight:800;font-size:18px;color:#7a1414">See it for yourself</div>
+     <div class="flexrow" style="justify-content:center;margin-top:12px">
+       <a class="btn sm" data-view="survey_basics">Try a survey</a>
+       <a class="btn sm sec" data-view="connect">Connect records</a>
+       <a class="btn sm sec" data-view="browse">Search the dictionary</a>
+       <a class="btn sm sec" data-view="reports">See charts</a>
+     </div></div>`}
+];
+let demoIdx=0, demoTimer=null, demoPlaying=true; const DEMO_DUR=4800;
+function demoStream(id,data){
+  const host=document.getElementById(id); if(!host) return; host.innerHTML='';
+  data.forEach((d,i)=>{const row=document.createElement('div');row.className='feedrow';
+    row.innerHTML=`<span class="res">${esc(d[0])}</span><span class="arr">&#8594;</span><span class="tgt">${esc(d[1])}</span>`;
+    host.appendChild(row); setTimeout(()=>row.classList.add('in'),220*(i+1));});
+}
+function demoReveal(sel){
+  [...document.querySelectorAll(sel)].forEach((r,i)=>{r.style.opacity='0';r.style.transition='all .45s';setTimeout(()=>{r.style.opacity='1';},180*(i+1));});
+}
+function demoDots(){
+  const d=$('#demo-dots'); if(!d) return;
+  d.innerHTML=DEMO_SCENES.map((s,i)=>`<span class="${i===demoIdx?'on':''}" data-i="${i}"></span>`).join('');
+  d.querySelectorAll('span').forEach(sp=>sp.onclick=()=>demoShow(+sp.dataset.i));
+}
+function demoSchedule(){
+  clearTimeout(demoTimer);
+  const bar=$('#demo-bar'); if(!bar) return;
+  bar.style.transition='none'; bar.style.width='0%';
+  if(!demoPlaying) return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const b=$('#demo-bar'); if(b){b.style.transition='width '+DEMO_DUR+'ms linear';b.style.width='100%';}}));
+  demoTimer=setTimeout(()=>demoShow(demoIdx+1),DEMO_DUR);
+}
+function demoShow(i){
+  const stage=$('#demo-stage'); if(!stage){clearTimeout(demoTimer);return;}
+  demoIdx=((i%DEMO_SCENES.length)+DEMO_SCENES.length)%DEMO_SCENES.length;
+  const s=DEMO_SCENES[demoIdx];
+  stage.innerHTML='<div class="demo-scene">'+s.html()+'</div>';
+  const t=$('#demo-title'); if(t) t.textContent=s.title;
+  const c=$('#demo-cap'); if(c) c.textContent=s.cap;
+  const o=$('#demo-open'); if(o) o.onclick=()=>go(s.view);
+  stage.querySelectorAll('[data-view]').forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.view);});
+  demoDots();
+  if(s.anim) setTimeout(()=>{if($('#demo-stage'))s.anim();},80);
+  demoSchedule();
+}
+function demoToggle(){
+  demoPlaying=!demoPlaying;
+  const p=$('#demo-play'); if(p) p.innerHTML=demoPlaying?'&#10073;&#10073;':'&#9654;';
+  if(demoPlaying) demoSchedule(); else clearTimeout(demoTimer);
+}
+function demoInit(){
+  clearTimeout(demoTimer); demoIdx=0;
+  demoPlaying=!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const p=$('#demo-play'); if(p){p.innerHTML=demoPlaying?'&#10073;&#10073;':'&#9654;';p.onclick=demoToggle;}
+  const pv=$('#demo-prev'); if(pv) pv.onclick=()=>demoShow(demoIdx-1);
+  const nx=$('#demo-next'); if(nx) nx.onclick=()=>demoShow(demoIdx+1);
+  demoShow(0);
+}
+
 VIEWS.home = ()=>`
   <div class="crumbs">Project Home and Design &rsaquo; <b>Project Home</b></div>
   <h2>OncoRegistry: Patient-Directed Oncology Registry</h2>
@@ -679,6 +825,8 @@ VIEWS.home = ()=>`
     person to contribute their records. The look and behavior mirror a familiar registry platform so
     the workflow is recognizable to study teams.
   </p>
+
+  ${demoPlayer()}
 
   <div class="note">
     <b>The core idea, in one line.</b> Today, registry teams build instruments and a data dictionary,
@@ -1601,6 +1749,8 @@ function go(view){
   bind(view);
 }
 function bind(view){
+  // animated walkthrough on the home page
+  if(view==='home') demoInit();
   // open instrument in designer
   main.querySelectorAll('.open-inst').forEach(a=>a.onclick=()=>renderInstrument(a.dataset.key));
   // dictionary download/upload
