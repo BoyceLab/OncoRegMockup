@@ -810,6 +810,7 @@ const DEMO_SCENES=[
      </div></div>`}
 ];
 let demoIdx=0, demoTimer=null, demoPlaying=true; const DEMO_DUR=4800;
+const DEMO_VIEW_LABEL={survey_basics:'the survey',connect:'Connect Health Records',ccda:'Download & Upload',harmonized:'the Harmonized Dictionary',reports:'Reports & Visualizations'};
 function demoStream(id,data){
   const host=document.getElementById(id); if(!host) return; host.innerHTML='';
   data.forEach((d,i)=>{const row=document.createElement('div');row.className='feedrow';
@@ -839,7 +840,11 @@ function demoShow(i){
   stage.innerHTML='<div class="demo-scene">'+s.html()+'</div>';
   const t=$('#demo-title'); if(t) t.textContent=s.title;
   const c=$('#demo-cap'); if(c) c.textContent=s.cap;
-  const o=$('#demo-open'); if(o) o.onclick=()=>go(s.view);
+  const o=$('#demo-open');
+  if(o){
+    if(s.view==='home'){ o.style.display='none'; }
+    else { o.style.display=''; o.textContent='Open '+(DEMO_VIEW_LABEL[s.view]||'this screen')+' \u2192'; o.onclick=()=>go(s.view); }
+  }
   stage.querySelectorAll('[data-view]').forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.view);});
   demoDots();
   if(s.anim) setTimeout(()=>{if($('#demo-stage'))s.anim();},80);
