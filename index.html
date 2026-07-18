@@ -343,6 +343,14 @@ tr:nth-child(even) td{background:#fbfaf8}
       <a class="nav" data-view="export"><span class="ic">&#8681;</span>Data Exports</a>
     </div>
     <div class="grp">
+      <div class="grphd">CURE ID Collaboration</div>
+      <a class="nav" data-view="cureid"><span class="ic">&#9873;</span>Proposal &amp; Rationale</a>
+      <a class="nav" data-view="cureid_flow"><span class="ic">&#8644;</span>Architecture &amp; Data Flow</a>
+      <a class="nav" data-view="cureid_map"><span class="ic">&#9783;</span>C-CDA/FHIR &rarr; CURE ID Crosswalk</a>
+      <a class="nav" data-view="cureid_evidence"><span class="ic">&#9878;</span>Evidence, Governance &amp; Phasing</a>
+    </div>
+
+    <div class="grp">
       <div class="grphd">Help</div>
       <a class="nav" data-view="about"><span class="ic">&#9432;</span>About this mockup</a>
     </div>
@@ -2049,6 +2057,329 @@ VIEWS.about = ()=>`
 `;
 
 /* ============================================================
+   CURE ID / CDRC COLLABORATION  (added section)
+   ============================================================ */
+
+/* Element-level crosswalk: CURE ID Rare Cancer Generic CRF <- registry sources.
+   Variable names and response options are taken from the CURE ID Clinician and
+   Patient CRF workbook, sheet "Rare Cancer Generic Single Vers" (v1.25, 3/17/26).
+   d = derivability:  auto | review | survey | manual                        */
+const CUREID_MAP=[
+ {step:'PRE',  v:'therapeutic_area', q:'Therapeutic area', d:'auto',   src:'Registry constant', fhir:'n/a — set to "Rare Cancers" at export', note:'Fixed value for this registry.'},
+ {step:'PRE',  v:'user_type',        q:'Who is reporting this case?', d:'manual', src:'Attestation step', fhir:'n/a', note:'Governance decision. A machine-derived case has no reporter until a human attests to it.'},
+ {step:'1a',   v:'disease',          q:'What disease did the participant receive treatment for?', d:'review', src:'EHR problem list + survey', fhir:'Condition.code (ICD-10-CM C00-D49, SNOMED CT)', note:'Requires a mapping from ICD-10-CM/SNOMED to the CURE ID controlled disease list. Not one to one; needs a published crosswalk.'},
+ {step:'1a',   v:'sarcoma_subtype_other', q:'Sarcoma subtype if not listed', d:'review', src:'Pathology report', fhir:'DiagnosticReport (LOINC 60568-3) — free text', note:'ICD-O-3 morphology is the right source and is rarely present in patient-directed FHIR. NLP over the pathology narrative, then human confirmation.'},
+ {step:'2a',   v:'age_diagnosis',    q:'Age at diagnosis (banded)', d:'auto', src:'EHR', fhir:'Patient.birthDate + Condition.onsetDateTime', note:'Banded to the 18 CURE ID age groups (<1 month through 90+ years). Banding is also the privacy control.'},
+ {step:'2b',   v:'sex',              q:'Sex assigned at birth', d:'review', src:'EHR + survey', fhir:'US Core Birth Sex extension; fallback Patient.gender', note:'Patient.gender is administrative gender, not sex assigned at birth. Where the extension is absent, ask on the survey rather than infer.'},
+ {step:'3a',   v:'country_treated',  q:'Country of treatment', d:'auto', src:'EHR', fhir:'Organization.address.country / Encounter.serviceProvider', note:'Defaults to United States; confirm on survey for participants with care abroad.'},
+ {step:'3a1',  v:'races',            q:'Race', d:'review', src:'EHR + survey', fhir:'US Core Race extension (OMB categories)', note:'CURE ID uses OMB categories, so the value set aligns. EHR race is often incomplete or defaulted; the survey answer should win.'},
+ {step:'3a2',  v:'ethnicity',        q:'Ethnicity', d:'review', src:'EHR + survey', fhir:'US Core Ethnicity extension', note:'Same precedence rule as race.'},
+ {step:'4a',   v:'risk_factors_oncology', q:'Predisposing risk factors', d:'survey', src:'Survey only', fhir:'not represented', note:'Agent Orange, 9/11 exposure, environmental toxin exposure, prior radiation or chemotherapy. Effectively never structured in an EHR. This is the clearest argument for keeping the survey arm.'},
+ {step:'4b',   v:'risk_factors_TPS_oncology', q:'Tumor predisposition syndrome', d:'review', src:'Survey + genetics', fhir:'Condition.code; Observation (LOINC 69548-6 genetic variant assessment)', note:'A GenomeConnect-style genetic health survey outperforms the EHR here for most participants.'},
+ {step:'5a',   v:'primary_location_details_oncology_generic', q:'Primary tumor location', d:'auto', src:'EHR', fhir:'Condition.bodySite; ICD-10-CM topography', note:'Maps cleanly to the 23-item CURE ID body-site list.'},
+ {step:'5b',   v:'disease_stage_oncology', q:'Localized / locally advanced / metastatic', d:'review', src:'EHR + notes', fhir:'Observation (LOINC 21908-9 stage group, 21914-7 clinical TNM)', note:'Structured staging is uncommon in patient-directed pulls. Derive a first pass from secondary-malignancy codes, then confirm.'},
+ {step:'5b1',  v:'metastatic',       q:'Metastatic site(s)', d:'auto', src:'EHR', fhir:'Condition.code ICD-10-CM C77-C79', note:'Secondary neoplasm codes are well populated and map directly to the bone/brain/liver/lung/lymph-node list.'},
+ {step:'5c',   v:'year_of_diagnosis', q:'Year of diagnosis', d:'auto', src:'EHR', fhir:'Condition.onsetDateTime, fallback recordedDate', note:'Year only. Do not export full dates.'},
+ {step:'5d',   v:'diagnostic_delays', q:'Time from first encounter to diagnosis', d:'review', src:'EHR-derived, participant confirmed', fhir:'earliest Encounter.period.start to Condition.onsetDateTime', note:'The EHR estimate is systematically short because it misses care before the connected system. Show the estimate, let the participant correct it.'},
+ {step:'5e',   v:'reason_delay',     q:'Reason for diagnostic delay', d:'survey', src:'Survey only', fhir:'not represented', note:'Free text. High narrative value; no structured analogue.'},
+ {step:'5f',   v:'signs_symptoms_at_diagnosis', q:'Signs and symptoms at diagnosis', d:'review', src:'EHR + survey', fhir:'Condition, Observation near onset date', note:'Partially recoverable, but recall from the participant is usually richer than the coded record.'},
+ {step:'6a',   v:'biopsy_confirmed_oncology', q:'Biopsy or resection confirmed', d:'auto', src:'EHR', fhir:'Procedure (SNOMED biopsy) or DiagnosticReport surgical pathology', note:'Presence of a surgical pathology report is strong evidence.'},
+ {step:'6b',   v:'pathologist_reviewed_expert_oncology', q:'Expert pathology review', d:'survey', src:'Survey only', fhir:'not represented', note:'Reviewer expertise is not a coded attribute anywhere.'},
+ {step:'7a',   v:'genomic_testing',  q:'Genomic testing performed', d:'auto', src:'EHR', fhir:'DiagnosticReport (LOINC 51969-4); Observation genomic profile', note:'Presence or absence of the report answers the yes/no reliably.'},
+ {step:'7a1',  v:'gemonic_testing_som_germ', q:'Somatic or germline', d:'review', src:'EHR', fhir:'Observation component; specimen type', note:'Usually inferable from the specimen and report header; confirm before export.'},
+ {step:'7a3',  v:'genomic_testing_details', q:'Molecular abnormality detected', d:'review', src:'EHR + NLP', fhir:'Observation (LOINC 48018-6 gene studied, 48004-6 variant)', note:'Structured where a genomics vendor feed exists; otherwise NLP over the report, then confirmation.'},
+ {step:'7b',   v:'tumor_board_oncology', q:'Discussed at tumor board', d:'survey', src:'Survey only', fhir:'not represented', note:'Occasionally in notes; not reliably.'},
+ {step:'7c',   v:'alternative_diagnosis', q:'Previously misdiagnosed', d:'survey', src:'Survey, EHR as a hint', fhir:'Condition.verificationStatus = entered-in-error; problem-list churn', note:'Problem-list churn is a useful prompt for the participant, not an answer on its own.'},
+ {step:'8a',   v:'regimen_details_oncology', q:'Radiation / surgery / systemic therapy', d:'auto', src:'EHR', fhir:'Procedure (CPT 77xxx radiation; surgical SNOMED) + MedicationRequest', note:'The three modality flags are well supported.'},
+ {step:'8a1',  v:'regimen_details_surgery', q:'Best surgical outcome', d:'review', src:'Operative note', fhir:'Procedure.outcome; DiagnosticReport margins', note:'Margin status lives in the pathology narrative. NLP plus confirmation.'},
+ {step:'8b',   v:'systemic_drug',    q:'Systemic drugs administered', d:'auto', src:'EHR', fhir:'MedicationRequest / MedicationDispense / MedicationStatement, RxNorm', note:'The core of the submission. Walk every translation child of the coding so an inner RxNorm code is not lost inside an outer NDC.'},
+ {step:'9a1',  v:'began_treatment_year_and_month', q:'Treatment start', d:'auto', src:'EHR', fhir:'MedicationRequest.authoredOn; earliest dispense', note:'Exported as year and month only.'},
+ {step:'9a1b', v:'ongoing',          q:'Still taking the drug', d:'review', src:'EHR + participant', fhir:'MedicationStatement.status; last dispense plus days supply', note:'A stale record looks identical to an ongoing one. Ask.'},
+ {step:'9a1c', v:'end_treatment_year_and_month', q:'Treatment end', d:'review', src:'EHR + participant', fhir:'last dispense + days supply, or effectivePeriod.end', note:'Discontinuation is usually implicit. Participant confirmation matters most here.'},
+ {step:'9a2a', v:'drug_dose',        q:'Dose', d:'review', src:'EHR', fhir:'Dosage.doseAndRate', note:'Frequently only a free-text sig. Parse, then show for confirmation.'},
+ {step:'9a2b', v:'drug_frequency',   q:'Frequency', d:'review', src:'EHR', fhir:'Dosage.timing', note:'Same caveat as dose.'},
+ {step:'9a2c', v:'drug_route',       q:'Route of administration', d:'auto', src:'EHR', fhir:'Dosage.route (SNOMED)', note:'Usually coded.'},
+ {step:'9a3a', v:'have_significant_adverse_events', q:'Significant adverse event', d:'review', src:'EHR + survey', fhir:'Condition / AllergyIntolerance / Observation in temporal proximity', note:'Temporal proximity is a signal, not an attribution. Never auto-assert causality; put it to the participant or clinician.'},
+ {step:'9a3a1',v:'adverse_events_generic', q:'Which adverse events', d:'review', src:'EHR + survey', fhir:'Condition.code; map to the CURE ID adverse-event list', note:'PRO-CTCAE items already in this registry give a stronger, participant-sourced answer.'},
+ {step:'9a3b', v:'discontinuation_drug_#_other_reason', q:'Reason stopped', d:'survey', src:'Survey only', fhir:'not represented', note:'Adverse event, progression, participant choice, withdrawal of consent. Intent is not recorded in the EHR.'},
+ {step:'9a4a', v:'how_drug_used',    q:'On-label / off-label SOC / novel use', d:'review', src:'Derived', fhir:'RxNorm ingredient compared with FDA labeled indication (SPL/DailyMed) against Condition.code', note:'The pivotal computation of the whole project. Automate the first pass, require human adjudication, and keep the reasoning auditable.'},
+ {step:'9a4b', v:'off_label_type',   q:'In what new way was it used', d:'review', src:'Derived + survey', fhir:'compare dose, route, schedule, and combination against label', note:'New indication versus new dose, schedule, duration, route, combination, or population. Partly computable, partly judgment.'},
+ {step:'10a',  v:'therapy_goals',    q:'Goals of the line of therapy', d:'survey', src:'Survey only', fhir:'not represented', note:'Cure, control, quality of life, symptom relief, prolonged life. Intent is not a coded field.'},
+ {step:'10b',  v:'outcome_line_#',   q:'Best outcome on this line', d:'review', src:'EHR + survey', fhir:'Observation (LOINC 21976-6 response); Condition.clinicalStatus = remission', note:'RECIST response is almost never structured in patient-directed data. Expect this to come from the survey plus radiology-report NLP.'},
+ {step:'10b1', v:'outcome_duration', q:'Duration of response', d:'survey', src:'Survey + derived', fhir:'interval between response and progression observations', note:'Derivable only where response is structured, which is rare.'},
+ {step:'10b2', v:'outcome_ongoing',  q:'Outcome ongoing', d:'survey', src:'Survey only', fhir:'not represented', note:'Point-in-time participant report.'},
+ {step:'10c',  v:'line_of_therapy #_description', q:'Other therapy details', d:'survey', src:'Survey only', fhir:'not represented', note:'Free text.'},
+ {step:'12',   v:'outcome_at_report', q:'Outcome at time of report', d:'review', src:'EHR + survey + mortality linkage', fhir:'Patient.deceased; Condition.clinicalStatus; Observation', note:'Loss of life is the one outcome where an external linkage (National Death Index, or a tokenized mortality file) materially improves ascertainment over the portal record.'},
+ {step:'12a',  v:'additional_info',  q:'Additional information', d:'survey', src:'Survey only', fhir:'not represented', note:'Free text narrative.'},
+ {step:'12c',  v:'file',             q:'Upload images or reports', d:'manual', src:'Participant upload', fhir:'DocumentReference (optionally pre-filled)', note:'Participant-directed C-CDA already contains documents; offer them for selective attachment rather than asking for a re-upload.'}
+];
+
+const D_LABEL={auto:'Auto-derivable',review:'Derive then confirm',survey:'Survey only',manual:'Human step'};
+const D_STYLE={
+  auto:  'background:#eef6ee;color:#2f6b2f;border-color:#c4ddbf',
+  review:'background:#fbeede;color:#8a4f14;border-color:#f0cfa0',
+  survey:'background:#e7f0fb;color:#1d5fa3;border-color:#b9d4ef',
+  manual:'background:#efeaf6;color:#5a3a8a;border-color:#d4c5ea'
+};
+function dBadge(d){return '<span class="pv" style="'+(D_STYLE[d]||'')+'">'+(D_LABEL[d]||d)+'</span>';}
+function cureCounts(){const c={auto:0,review:0,survey:0,manual:0};CUREID_MAP.forEach(r=>c[r.d]++);return c;}
+function cureMapToCSV(){
+  const head=['crf_step','cure_id_variable','question','derivability','registry_source','fhir_ccda_provenance','note'];
+  const esc2=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+  return [head.join(',')].concat(CUREID_MAP.map(r=>[r.step,r.v,r.q,D_LABEL[r.d],r.src,r.fhir,r.note].map(esc2).join(','))).join('\n');
+}
+
+/* ---------- 1. Proposal ---------- */
+VIEWS.cureid = ()=>{
+  const c=cureCounts(), t=CUREID_MAP.length;
+  return '<div class="crumbs">CURE ID Collaboration &rsaquo; <b>Proposal and rationale</b></div>'+
+  '<div class="kicker">Draft for discussion</div>'+
+  '<h2>Feeding participant-directed oncology data into CURE ID</h2>'+
+  '<p style="max-width:860px">CURE ID is the FDA and NCATS electronic treatment registry for off-label and repurposed drug use in conditions with '+
+  'inadequate approved therapy. The CURE Drug Repurposing Collaboratory at the Critical Path Institute runs its real-world data programme. '+
+  'Cases reach CURE ID today almost entirely by hand, one report at a time, typed by a clinician or a family. That is the bottleneck this '+
+  'registry is unusually well placed to remove.</p>'+
+  '<div class="note"><b>The proposition in one sentence.</b> This registry already asks participants to authorise a direct pull of their own '+
+  'health records through OAuth 2.0, and already collects the intent, exposure, and outcome context that records do not hold. Between the two '+
+  'sources we can assemble a CURE ID rare-cancer case largely automatically, put it in front of the person it belongs to for confirmation, '+
+  'and submit it as an attested report rather than a scraped one.</p>'+
+  '<div class="cards">'+
+    '<div class="card"><h4>CRF elements assessed</h4><div class="big">'+t+'</div><div class="sub">Rare Cancer Generic CRF v1.25</div></div>'+
+    '<div class="card"><h4>Auto-derivable</h4><div class="big">'+c.auto+'</div><div class="sub">From C-CDA and FHIR alone</div></div>'+
+    '<div class="card"><h4>Derive then confirm</h4><div class="big">'+c.review+'</div><div class="sub">Machine first pass, human check</div></div>'+
+    '<div class="card"><h4>Survey only</h4><div class="big">'+c.survey+'</div><div class="sub">Not present in any record</div></div>'+
+  '</div>'+
+  '<p style="max-width:860px">That last number is the finding worth leading with. Roughly a third of the CURE ID oncology CRF asks about things '+
+  'no electronic health record contains: why treatment was chosen, what the goal of a line of therapy was, whether the person was misdiagnosed '+
+  'first, whether they were exposed to Agent Orange or to the 9/11 site, and how they are actually doing. A pure record-extraction project '+
+  'cannot fill this form. A survey-only project cannot fill the exposure and timing half. The combination can.</p>'+
+
+  '<h3 class="mt">Why now</h3>'+
+  '<ul style="font-size:12.5px;max-width:860px">'+
+    '<li>FDA ran a Request for Information on drug repurposing for unmet medical needs, with comments closing 13 July 2026, and a hybrid public '+
+    'workshop convened by the Reagan-Udall Foundation on 5 August 2026 to discuss how promising candidates should be prioritised and selected.</li>'+
+    '<li>The CURE ID CRF now carries a Rare Cancer Generic single-version instrument and a Sarcoma instrument. The oncology intake path exists; '+
+    'it is not something we would be asking NCATS to invent.</li>'+
+    '<li>Patient-directed acquisition under the HIPAA right of access, and the individual access services emerging under TEFCA, make participant-'+
+    'authorised record retrieval a routine operation rather than a research special case.</li>'+
+    '<li>A working precedent exists in this group: the Registry Forge drug repurposing module already produces a CURE ID intake file from C-CDA '+
+    'and FHIR bundles for an ALS cohort, with age banding, pseudonymisation, and outcome mapping to the CURE ID vocabulary. Oncology is a change '+
+    'of CRF, not a change of architecture.</li>'+
+  '</ul>'+
+
+  '<h3 class="mt">What we would be asking of CDRC, NCATS, and FDA</h3>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:26%">Ask</th><th style="width:37%">Why it is needed</th><th>What we bring</th></tr>'+
+  '<tr><td>Agreement on machine-assisted case assembly</td><td>The CRF is written for a human reporter. A derived case needs an agreed '+
+  'attestation model before a single row is submitted.</td><td>A review interface where the participant or clinician sees and signs off on every '+
+  'derived value.</td></tr>'+
+  '<tr><td>A structured intake pathway</td><td>Manual re-keying of derived cases defeats the point.</td><td>A validated export conforming to the '+
+  'CRF variable names and response options, with a registry-issued case identifier namespace for de-duplication.</td></tr>'+
+  '<tr><td>A published disease-list crosswalk</td><td>The CURE ID disease field is a controlled list; our source is ICD-10-CM and SNOMED CT.</td>'+
+  '<td>A first-draft crosswalk plus the gap register, offered back as a shared artefact.</td></tr>'+
+  '<tr><td>Feedback of curated signals</td><td>One-way data flow benefits the repository, not the community that supplied it.</td><td>A cohort '+
+  'that can be re-queried when CURE ID surfaces a candidate worth a closer look.</td></tr>'+
+  '</table></div>'+
+
+  '<div class="note"><b>One thing to be clear about from the start.</b> CURE ID is a case-report repository. It is a hypothesis-generation and '+
+  'dissemination channel, and an excellent one. It is not the substrate for causal inference, because a collection of reported cases has no '+
+  'denominator and no comparator. The causal work happens on our side of the pipe, on the full registry cohort in a common data model. '+
+  'Conflating the two would be the most damaging thing we could do to this proposal. See <a data-view="cureid_evidence">Evidence and inference</a>.</div>'+
+  '<p><a class="btn" data-view="cureid_flow">Next: architecture and data flow</a> <a class="btn sec" data-view="cureid_map">Element-level crosswalk</a></p>';
+};
+
+/* ---------- 2. Architecture and workflow ---------- */
+VIEWS.cureid_flow = ()=>
+  '<div class="crumbs">CURE ID Collaboration &rsaquo; <b>Architecture and data flow</b></div>'+
+  '<h2>Architecture and data flow</h2>'+
+  '<p style="max-width:860px">Seven stages, from consent through to a submitted case and back again. Stages one and two already exist in this '+
+  'mockup as <a data-view="connect">Connect Health Records</a> and <a data-view="mapping">Clinical Data Mapping</a>. Stages four through six are '+
+  'what the collaboration would add.</p>'+
+  '<div class="flow">'+
+    '<div class="stage s1"><div class="icon">&#128203;</div><h4>0. Consent</h4><p>Enrolment on the platform with a separate, explicit consent tier '+
+    'for contribution to CURE ID as a named recipient.</p><div class="arrow">&#9654;</div></div>'+
+    '<div class="stage s1"><div class="icon">&#9883;</div><h4>1. Acquisition</h4><p>Participant-directed OAuth 2.0 and SMART on FHIR retrieval, plus '+
+    'C-CDA download and upload. The participant is the source, not the health system.</p><div class="arrow">&#9654;</div></div>'+
+    '<div class="stage s2"><div class="icon">&#8644;</div><h4>2. Normalisation</h4><p>RxNorm, SNOMED CT, ICD-10-CM, LOINC. Every translation child '+
+    'of a coding is walked so inner codes survive.</p><div class="arrow">&#9654;</div></div>'+
+    '<div class="stage s3"><div class="icon">&#9783;</div><h4>3. Common model</h4><p>Load to OMOP CDM. This is the registry of record and the thing '+
+    'analysts query.</p><div class="arrow">&#9654;</div></div>'+
+    '<div class="stage s4"><div class="icon">&#9881;</div><h4>4. Case derivation</h4><p>Lines of therapy, off-label determination, outcome mapping '+
+    'into CRF variables and response options.</p><div class="arrow">&#9654;</div></div>'+
+    '<div class="stage s4"><div class="icon">&#9997;</div><h4>5. Attestation</h4><p>The participant or clinician reviews every derived value, '+
+    'corrects it, adds what only they know, and signs.</p><div class="arrow">&#9654;</div></div>'+
+    '<div class="stage s5"><div class="icon">&#8686;</div><h4>6. Submission</h4><p>Structured export to CURE ID with a registry case identifier. '+
+    'Curated signals return to the registry.</p></div>'+
+  '</div>'+
+
+  '<h3 class="mt">Why the common data model sits in the middle</h3>'+
+  '<p style="max-width:860px">It would be quicker to map FHIR fields straight onto CRF variables and skip stage three. It would also be a mistake. '+
+  'The CRF is a reporting format, shaped by what a person can reasonably be asked in a web form. It flattens time, bands ages, and collapses a '+
+  'treatment history into one best outcome. Every one of those choices is right for a case report and wrong for analysis. Loading to OMOP first '+
+  'means the registry keeps the full longitudinal structure, and the CURE ID case becomes one derived view of it rather than the only thing we '+
+  'kept. It also means the observational analytics that already exist for OMOP work on this data without further translation.</p>'+
+
+  '<h3 class="mt">The off-label determination</h3>'+
+  '<p style="max-width:860px">The <code>how_drug_used</code> field is where the whole project either earns its keep or does not. The CRF asks '+
+  'whether a drug was used in accordance with its label, off-label as routine standard of care, or in a genuinely new way, and then asks in what '+
+  'new way. Computing a first pass means comparing the RxNorm ingredient against the FDA labelled indications for that product and against the '+
+  'condition being treated, then comparing dose, route, schedule, and combination against the label.</p>'+
+  '<div class="note"><b>Design rule.</b> The determination is proposed by software and decided by a human, and the reasoning behind the proposal '+
+  'is stored alongside the answer. In oncology, off-label use as standard of care is so routine that a naive classifier will flag nearly every '+
+  'regimen as novel. An unaudited pipeline would flood CURE ID with false novelty and damage the signal it exists to protect.</div>'+
+
+  '<h3 class="mt">Provenance carried on every value</h3>'+
+  '<p style="max-width:860px">Each field that leaves this registry carries an internal tag: derived from structured record, extracted from narrative '+
+  'text, answered on a survey, or confirmed by the participant. CURE ID may have no field for this today. Keep it anyway. When someone later asks '+
+  'whether a response rate came from a radiology report or from a person remembering, the answer needs to exist.</p>'+
+
+  '<h3 class="mt">Platform and vendor decisions still open</h3>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:20%">Decision</th><th style="width:16%">Status</th><th>What settles it</th></tr>'+
+  '<tr><td>Survey and acquisition platform</td><td><span class="pill auto">Leaning</span></td><td>A platform that handles both consented survey '+
+  'capture and participant-directed record retrieval in one enrolment. The test is whether the connection covers enough networks that a '+
+  'participant treated at two systems ends up with one record rather than a fragment.</td></tr>'+
+  '<tr><td>Tokenised linkage vendor</td><td><span class="pill ehr">Undecided</span></td><td>Only two things justify it: mortality ascertainment '+
+  'beyond what the portal shows, and de-duplication against other data sources at scale. It does nothing for CURE ID intake directly. Decide it '+
+  'on the mortality question, which is a real gap for <code>outcome_at_report</code>, not on general principle.</td></tr>'+
+  '<tr><td>Full bulk exports from health systems</td><td><span class="pill ehr">Undecided</span></td><td>Institution-mediated exports bring '+
+  'completeness and bring a per-site agreement, IRB reliance, and governance burden with them. Baseline capability should assume participant-'+
+  'directed C-CDA and FHIR only, so that nothing in the design depends on an export that may not arrive.</td></tr>'+
+  '<tr><td>Narrative text extraction</td><td><span class="pill auto">In scope, phase two</span></td><td>Staging, margin status, and response '+
+  'assessment all live in narrative reports. Structured-first, documents-second, exactly as the existing ingestion sequence already works.</td></tr>'+
+  '</table></div>'+
+  '<p><a class="btn" data-view="cureid_map">Next: element-level crosswalk</a></p>';
+
+/* ---------- 3. Crosswalk ---------- */
+VIEWS.cureid_map = ()=>{
+  const c=cureCounts();
+  const rows=CUREID_MAP.map(r=>
+    '<tr><td><span class="ftype">'+esc(r.step)+'</span></td>'+
+    '<td><code>'+esc(r.v)+'</code><div style="color:#666;font-size:11px;margin-top:2px">'+esc(r.q)+'</div></td>'+
+    '<td>'+dBadge(r.d)+'</td>'+
+    '<td style="font-size:11.5px">'+esc(r.src)+'</td>'+
+    '<td style="font-size:11.5px;color:#444">'+esc(r.fhir)+'</td>'+
+    '<td style="font-size:11.5px;color:#555">'+esc(r.note)+'</td></tr>').join('');
+  return '<div class="crumbs">CURE ID Collaboration &rsaquo; <b>Element-level crosswalk</b></div>'+
+  '<h2>C-CDA and FHIR to CURE ID crosswalk</h2>'+
+  '<p style="max-width:880px">Every element of the CURE ID Rare Cancer Generic CRF, version 1.25 of 17 March 2026, assessed against what a '+
+  'participant-directed record pull can actually deliver. This is the demonstration artefact: it is what makes the conversation with CDRC concrete '+
+  'rather than aspirational.</p>'+
+  '<div class="legend">'+dBadge('auto')+' '+c.auto+' &nbsp; '+dBadge('review')+' '+c.review+' &nbsp; '+dBadge('survey')+' '+c.survey+' &nbsp; '+
+  dBadge('manual')+' '+c.manual+'</div>'+
+  '<p><a class="btn sec sm" id="dl-cure">Download crosswalk CSV</a></p>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:5%">Step</th><th style="width:19%">CURE ID variable</th><th style="width:11%">Derivability</th>'+
+  '<th style="width:12%">Source</th><th style="width:20%">FHIR / C-CDA provenance</th><th>Note</th></tr>'+rows+'</table></div>'+
+  '<div class="note"><b>Reading this table.</b> Auto-derivable does not mean unsupervised. It means the value can be computed without asking the '+
+  'participant a question they would find tedious. Everything still passes through the attestation step before it leaves the registry.</div>'+
+  '<h3 class="mt">Known gaps to raise with CDRC</h3>'+
+  '<ul style="font-size:12.5px;max-width:880px">'+
+  '<li>The CURE ID disease field is a controlled list. There is no published crosswalk from ICD-10-CM or SNOMED CT to it. Building one is a '+
+  'deliverable in its own right and would be useful well beyond this project.</li>'+
+  '<li>ICD-O-3 morphology, which is how oncology actually names a tumour, has no home in the CRF and is not reliably present in patient-directed '+
+  'FHIR. The sarcoma subtype free-text field is doing work that a coded element should be doing.</li>'+
+  '<li>Response assessment has no structured representation to pull from in most patient-directed data. Expect the survey and narrative extraction '+
+  'to carry it, and say so openly rather than implying a precision that is not there.</li>'+
+  '<li>Several outcome options in the CRF are conditioned on the reporter being a care partner. A derived case needs an agreed rule for which '+
+  'branch it belongs to.</li>'+
+  '</ul>'+
+  '<p><a class="btn" data-view="cureid_evidence">Next: evidence, governance and phasing</a></p>';
+};
+
+/* ---------- 4. Evidence, governance, milestones ---------- */
+VIEWS.cureid_evidence = ()=>
+  '<div class="crumbs">CURE ID Collaboration &rsaquo; <b>Evidence, governance and phasing</b></div>'+
+  '<h2>Evidence, governance and phasing</h2>'+
+
+  '<h3>What this data can and cannot support</h3>'+
+  '<p style="max-width:880px">The stated ambition is evidence strong enough for causal inference about repurposed drugs. That is achievable, but '+
+  'not from CURE ID submissions, and the distinction has to be held firmly.</p>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:24%">Artefact</th><th style="width:26%">What it is</th><th>What it supports</th></tr>'+
+  '<tr><td>CURE ID case reports</td><td>Attested individual reports of novel drug use, browsable publicly</td><td>Hypothesis generation, signal '+
+  'surfacing, community awareness. No denominator, no comparator, strong selection into reporting. Not an estimand.</td></tr>'+
+  '<tr><td>Registry cohort in OMOP</td><td>Every enrolled participant, exposed and unexposed, with longitudinal structure</td><td>Cohort description, '+
+  'exposure prevalence, and with care, comparative effectiveness under a new-user active-comparator design.</td></tr>'+
+  '<tr><td>Federated network study</td><td>The same cohort definition run across other registries and claims or EHR sources</td><td>The only '+
+  'realistic route to a causal estimate with defensible precision in a rare cancer.</td></tr>'+
+  '</table></div>'+
+
+  '<h3 class="mt">Methodological commitments made in advance</h3>'+
+  '<ul style="font-size:12.5px;max-width:880px">'+
+  '<li><b>New-user, active-comparator design.</b> Prevalent-user designs on repurposing questions produce survivorship artefacts that look '+
+  'like efficacy.</li>'+
+  '<li><b>Immortal time handled explicitly.</b> Defining exposure by a treatment received after the index date guarantees the exposed group '+
+  'survived long enough to receive it. This is the single most common way observational repurposing analyses go wrong.</li>'+
+  '<li><b>Propensity score adjustment with reported diagnostics.</b> Covariate balance published, not asserted.</li>'+
+  '<li><b>Negative control outcomes and empirical calibration.</b> Pre-specify controls with no plausible causal relation to the exposure and '+
+  'calibrate the observed effects against their distribution.</li>'+
+  '<li><b>Pre-registered protocol and analysis plan.</b> Written before the data are complete, published, and deviations reported.</li>'+
+  '<li><b>Honest reporting of power.</b> A participant-directed rare-cancer cohort will be in the tens to low hundreds. That supports description '+
+  'and hypothesis generation. Claiming more would be the fastest way to discredit the method.</li>'+
+  '</ul>'+
+  '<div class="note"><b>The design template already exists.</b> The published approach to identifying repurposing candidates in ALS from electronic '+
+  'health records, with explicit exposure criteria based on dispense windows and duration, restriction to drugs meeting a minimum exposed count, '+
+  'covariate assembly, and grouping by ATC class, transfers directly. The Registry Forge module in this project implements the cohort-assembly half '+
+  'of it and deliberately leaves the inferential statistics to purpose-built tooling.</div>'+
+
+  '<h3 class="mt">Governance and consent</h3>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:22%">Consideration</th><th>Position</th></tr>'+
+  '<tr><td>Consent to redisclose</td><td>The HIPAA right of access lets a participant obtain their record. It does not by itself authorise us to '+
+  'send a derived case to a federal repository. CURE ID contribution needs its own consent tier, named at enrolment, separately revocable.</td></tr>'+
+  '<tr><td>Re-identification risk</td><td>CURE ID cases are publicly browsable. A rare sarcoma subtype, an unusual primary site, and a narrow age '+
+  'band can identify someone in a community of a few hundred. Age banding, year-only dates, suppression of small cells, and a review of free-text '+
+  'fields before submission are all mandatory, not optional.</td></tr>'+
+  '<tr><td>IRB</td><td>Name CURE ID and CDRC as recipients in the original protocol. Adding a federal recipient by amendment after enrolment has '+
+  'begun means re-consenting people, and some will not respond.</td></tr>'+
+  '<tr><td>Attestation and liability</td><td>Unresolved and blocking. Either the participant attests as a patient or care-partner reporter, or a '+
+  'clinician co-signs. The CRF branches on this, so it cannot be deferred.</td></tr>'+
+  '<tr><td>Duplicate cases</td><td>A person may already be in CURE ID through a clinician submission. A registry-issued case identifier namespace '+
+  'and an agreed de-duplication rule are needed before the first submission, not after.</td></tr>'+
+  '<tr><td>Return of value</td><td>Participants give records and time. The registry should return something legible to them: their own assembled '+
+  'timeline, and notice when a signal touching their treatment is surfaced.</td></tr>'+
+  '</table></div>'+
+
+  '<h3 class="mt">Phasing</h3>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:9%">Phase</th><th style="width:16%">Window</th><th style="width:37%">Work</th><th>Deliverable</th></tr>'+
+  '<tr><td><b>0</b></td><td>Now to Sept 2026</td><td>Align with CDRC, NCATS, and FDA. Confirm the CRF version. Settle the attestation model, the '+
+  'case identifier namespace, and whether a structured intake pathway can exist.</td><td>Concept memo, and this page as the shared reference '+
+  'artefact.</td></tr>'+
+  '<tr><td><b>1</b></td><td>Oct to Dec 2026</td><td>Formalise the crosswalk. Build the ICD-10-CM and SNOMED CT to CURE ID disease-list mapping. '+
+  'Publish the gap register.</td><td>Versioned crosswalk v1.0 with a public change log.</td></tr>'+
+  '<tr><td><b>2</b></td><td>Jan to Mar 2027</td><td>Technical demonstration on synthetic data and a consented pilot of ten to twenty-five '+
+  'participants. End to end: record pull, common model load, case derivation, attestation interface, export file.</td><td>Reproducible pipeline '+
+  'and a set of demonstration cases.</td></tr>'+
+  '<tr><td><b>3</b></td><td>Apr to Jun 2027</td><td>Live submission pathway with CDRC. De-duplication in operation. Signal feedback loop '+
+  'established.</td><td>First submitted attested cases.</td></tr>'+
+  '<tr><td><b>4</b></td><td>H2 2027</td><td>Analytic layer on the registry cohort. Off-label exposure surveillance, cohort assembly, negative '+
+  'control calibration.</td><td>Methods paper and a candidate list with stated uncertainty.</td></tr>'+
+  '</table></div>'+
+
+  '<h3 class="mt">Risks worth naming out loud</h3>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:30%">Risk</th><th style="width:12%">Severity</th><th>Mitigation</th></tr>'+
+  '<tr><td>Fragmented records. Participants connect one portal and their oncology care happened at three places.</td><td>High</td><td>Design for '+
+  'multiple connections per participant. Report connection coverage as a data-quality measure, not as a footnote.</td></tr>'+
+  '<tr><td>Off-label classifier over-flags, since off-label use is routine in oncology.</td><td>High</td><td>Human adjudication mandatory. '+
+  'Calibrate the classifier against a manually reviewed sample before any submission.</td></tr>'+
+  '<tr><td>Attestation stalls the whole pipeline if no model is agreed.</td><td>High</td><td>Treat it as a phase-zero gate. Nothing downstream '+
+  'is worth building until it is settled.</td></tr>'+
+  '<tr><td>Sample size cannot support the causal claim.</td><td>Medium</td><td>Say so from the outset. Build for federation so the claim can be '+
+  'made later with partners rather than overclaimed now.</td></tr>'+
+  '<tr><td>Re-identification through a public case repository.</td><td>Medium</td><td>Banding, suppression, free-text review, and a participant '+
+  'preview of exactly what will be published about them.</td></tr>'+
+  '<tr><td>Response and outcome data are too thin to be useful.</td><td>Medium</td><td>Lean on the participant-reported instruments already in '+
+  'this registry rather than waiting for structured RECIST that will not arrive.</td></tr>'+
+  '</table></div>'+
+  '<p class="muted mt" style="font-size:11.5px;max-width:880px">Draft prepared for internal discussion. Not affiliated with, and not reviewed or '+
+  'endorsed by, FDA, NCATS, NIH, or the Critical Path Institute. CRF variable names and response options are transcribed from the CURE ID '+
+  'Clinician and Patient CRF workbook supplied to the project team.</p>';
+
+
+/* ============================================================
    ROUTER + EVENTS
    ============================================================ */
 function go(view){
@@ -2233,6 +2564,8 @@ function bind(view){
     ['bq','bsrc','bdom','bcap'].forEach(id=>{const e=$('#'+id); if(e){e.addEventListener('input',renderBrowse);e.addEventListener('change',renderBrowse);}});
     const bc=$('#b-csv'); if(bc) bc.onclick=()=>downloadFile('OncoRegistry_Catalog.csv',masterToCSV(MASTER));
   }
+  // CURE ID crosswalk download
+  const dc=$('#dl-cure'); if(dc) dc.onclick=()=>downloadFile('OncoRegistry_CUREID_Crosswalk.csv',cureMapToCSV());
   // export csv
   const csv=$('#dl-csv'); if(csv) csv.onclick=()=>downloadFile('OncoRegistry_export.csv',recordsToCSV());
   // any in-content data-view links

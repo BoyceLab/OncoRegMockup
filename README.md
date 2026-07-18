@@ -42,6 +42,21 @@ The two EHR instruments are read only and map from standard FHIR resources. Stru
 medications, labs, vitals, procedures) arrive first. Unstructured data (clinical notes, pathology, radiology)
 are added in a second phase, with a natural language step that extracts concepts from free text.
 
+
+## CURE ID / CDRC collaboration section
+
+A four-page section proposing a demonstration project with the FDA-NCATS CURE ID treatment registry
+and the CURE Drug Repurposing Collaboratory at the Critical Path Institute:
+
+- **Proposal & Rationale** the case for machine-assisted, participant-attested case submission.
+- **Architecture & Data Flow** seven stages from consent to submitted case, with the open vendor decisions.
+- **C-CDA/FHIR to CURE ID Crosswalk** all 47 elements of the Rare Cancer Generic CRF (v1.25, 17 Mar 2026)
+  scored as auto-derivable, derive-then-confirm, survey-only, or human step. Downloadable as CSV.
+- **Evidence, Governance & Phasing** what the data can and cannot support for causal inference,
+  consent and re-identification posture, a five-phase plan, and a risk register.
+
+The crosswalk is the demonstration artefact. It is what makes the conversation with CDRC concrete.
+
 ## Note
 
 No real data are collected. Health system names, participants, and values are fabricated for the demo.
