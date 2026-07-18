@@ -331,6 +331,7 @@ tr:nth-child(even) td{background:#fbfaf8}
       <a class="nav" data-view="survey_pro"><span class="ic">&#9745;</span>Survey: Outcomes (PRO)</a>
       <a class="nav" data-view="survey_cam"><span class="ic">&#9745;</span>Survey: Integrative Medicine (I-CAM-Q)</a>
       <a class="nav" data-view="survey_supp"><span class="ic">&#9745;</span>Survey: Supplement Detail</a>
+      <a class="nav" data-view="survey_hpo"><span class="ic">&#129516;</span>Comprehensive Health Survey (HPO)</a>
       <a class="nav" data-view="connect"><span class="ic">&#9883;</span>Connect Health Records</a>
       <a class="nav" data-view="ccda"><span class="ic">&#128193;</span>Download &amp; Upload (C-CDA)</a>
       <a class="nav" data-view="mapping"><span class="ic">&#8644;</span>Clinical Data Mapping</a>
@@ -2076,19 +2077,19 @@ const CUREID_MAP=[
  {step:'3a1',  v:'races',            q:'Race', d:'review', src:'EHR + survey', fhir:'US Core Race extension (OMB categories)', note:'CURE ID uses OMB categories, so the value set aligns. EHR race is often incomplete or defaulted; the survey answer should win.'},
  {step:'3a2',  v:'ethnicity',        q:'Ethnicity', d:'review', src:'EHR + survey', fhir:'US Core Ethnicity extension', note:'Same precedence rule as race.'},
  {step:'4a',   v:'risk_factors_oncology', q:'Predisposing risk factors', d:'survey', src:'Survey only', fhir:'not represented', note:'Agent Orange, 9/11 exposure, environmental toxin exposure, prior radiation or chemotherapy. Effectively never structured in an EHR. This is the clearest argument for keeping the survey arm.'},
- {step:'4b',   v:'risk_factors_TPS_oncology', q:'Tumor predisposition syndrome', d:'review', src:'Survey + genetics', fhir:'Condition.code; Observation (LOINC 69548-6 genetic variant assessment)', note:'A GenomeConnect-style genetic health survey outperforms the EHR here for most participants.'},
+ {step:'4b',   v:'risk_factors_TPS_oncology', q:'Tumor predisposition syndrome', d:'review', src:'Survey + genetics', fhir:'Condition.code; Observation (LOINC 69548-6 genetic variant assessment)', note:'The comprehensive health survey carries this directly: a genetic testing module plus HPO-coded findings across 19 body systems. Outperforms the record for most participants.'},
  {step:'5a',   v:'primary_location_details_oncology_generic', q:'Primary tumor location', d:'auto', src:'EHR', fhir:'Condition.bodySite; ICD-10-CM topography', note:'Maps cleanly to the 23-item CURE ID body-site list.'},
  {step:'5b',   v:'disease_stage_oncology', q:'Localized / locally advanced / metastatic', d:'review', src:'EHR + notes', fhir:'Observation (LOINC 21908-9 stage group, 21914-7 clinical TNM)', note:'Structured staging is uncommon in patient-directed pulls. Derive a first pass from secondary-malignancy codes, then confirm.'},
  {step:'5b1',  v:'metastatic',       q:'Metastatic site(s)', d:'auto', src:'EHR', fhir:'Condition.code ICD-10-CM C77-C79', note:'Secondary neoplasm codes are well populated and map directly to the bone/brain/liver/lung/lymph-node list.'},
  {step:'5c',   v:'year_of_diagnosis', q:'Year of diagnosis', d:'auto', src:'EHR', fhir:'Condition.onsetDateTime, fallback recordedDate', note:'Year only. Do not export full dates.'},
- {step:'5d',   v:'diagnostic_delays', q:'Time from first encounter to diagnosis', d:'review', src:'EHR-derived, participant confirmed', fhir:'earliest Encounter.period.start to Condition.onsetDateTime', note:'The EHR estimate is systematically short because it misses care before the connected system. Show the estimate, let the participant correct it.'},
+ {step:'5d',   v:'diagnostic_delays', q:'Time from first encounter to diagnosis', d:'review', src:'EHR-derived, participant confirmed', fhir:'earliest Encounter.period.start to Condition.onsetDateTime', note:'The record estimate is systematically short because it misses care before the connected system. The health survey captures symptom onset and diagnosis age as separate items, which yields the interval directly.'},
  {step:'5e',   v:'reason_delay',     q:'Reason for diagnostic delay', d:'survey', src:'Survey only', fhir:'not represented', note:'Free text. High narrative value; no structured analogue.'},
- {step:'5f',   v:'signs_symptoms_at_diagnosis', q:'Signs and symptoms at diagnosis', d:'review', src:'EHR + survey', fhir:'Condition, Observation near onset date', note:'Partially recoverable, but recall from the participant is usually richer than the coded record.'},
+ {step:'5f',   v:'signs_symptoms_at_diagnosis', q:'Signs and symptoms at diagnosis', d:'review', src:'EHR + survey', fhir:'Condition, Observation near onset date', note:'The health survey records each finding as an HPO term with age of first symptom captured separately from age of diagnosis, which is more structured than the equivalent record data rather than less.'},
  {step:'6a',   v:'biopsy_confirmed_oncology', q:'Biopsy or resection confirmed', d:'auto', src:'EHR', fhir:'Procedure (SNOMED biopsy) or DiagnosticReport surgical pathology', note:'Presence of a surgical pathology report is strong evidence.'},
  {step:'6b',   v:'pathologist_reviewed_expert_oncology', q:'Expert pathology review', d:'survey', src:'Survey only', fhir:'not represented', note:'Reviewer expertise is not a coded attribute anywhere.'},
  {step:'7a',   v:'genomic_testing',  q:'Genomic testing performed', d:'auto', src:'EHR', fhir:'DiagnosticReport (LOINC 51969-4); Observation genomic profile', note:'Presence or absence of the report answers the yes/no reliably.'},
  {step:'7a1',  v:'gemonic_testing_som_germ', q:'Somatic or germline', d:'review', src:'EHR', fhir:'Observation component; specimen type', note:'Usually inferable from the specimen and report header; confirm before export.'},
- {step:'7a3',  v:'genomic_testing_details', q:'Molecular abnormality detected', d:'review', src:'EHR + NLP', fhir:'Observation (LOINC 48018-6 gene studied, 48004-6 variant)', note:'Structured where a genomics vendor feed exists; otherwise NLP over the report, then confirmation.'},
+ {step:'7a3',  v:'genomic_testing_details', q:'Molecular abnormality detected', d:'review', src:'EHR + NLP', fhir:'Observation (LOINC 48018-6 gene studied, 48004-6 variant)', note:'Structured where a genomics vendor feed exists; otherwise NLP over the report. The health survey also asks whether the participant holds a copy of the report and supports upload, which is often the faster route.'},
  {step:'7b',   v:'tumor_board_oncology', q:'Discussed at tumor board', d:'survey', src:'Survey only', fhir:'not represented', note:'Occasionally in notes; not reliably.'},
  {step:'7c',   v:'alternative_diagnosis', q:'Previously misdiagnosed', d:'survey', src:'Survey, EHR as a hint', fhir:'Condition.verificationStatus = entered-in-error; problem-list churn', note:'Problem-list churn is a useful prompt for the participant, not an answer on its own.'},
  {step:'8a',   v:'regimen_details_oncology', q:'Radiation / surgery / systemic therapy', d:'auto', src:'EHR', fhir:'Procedure (CPT 77xxx radiation; surgical SNOMED) + MedicationRequest', note:'The three modality flags are well supported.'},
@@ -2101,7 +2102,7 @@ const CUREID_MAP=[
  {step:'9a2b', v:'drug_frequency',   q:'Frequency', d:'review', src:'EHR', fhir:'Dosage.timing', note:'Same caveat as dose.'},
  {step:'9a2c', v:'drug_route',       q:'Route of administration', d:'auto', src:'EHR', fhir:'Dosage.route (SNOMED)', note:'Usually coded.'},
  {step:'9a3a', v:'have_significant_adverse_events', q:'Significant adverse event', d:'review', src:'EHR + survey', fhir:'Condition / AllergyIntolerance / Observation in temporal proximity', note:'Temporal proximity is a signal, not an attribution. Never auto-assert causality; put it to the participant or clinician.'},
- {step:'9a3a1',v:'adverse_events_generic', q:'Which adverse events', d:'review', src:'EHR + survey', fhir:'Condition.code; map to the CURE ID adverse-event list', note:'PRO-CTCAE items already in this registry give a stronger, participant-sourced answer.'},
+ {step:'9a3a1',v:'adverse_events_generic', q:'Which adverse events', d:'review', src:'EHR + survey', fhir:'Condition.code; map to the CURE ID adverse-event list', note:'PRO-CTCAE items already in this registry give a stronger, participant-sourced answer, and HPO-coded survey findings supply the pre-existing phenotype needed to separate a new event from a long-standing one.'},
  {step:'9a3b', v:'discontinuation_drug_#_other_reason', q:'Reason stopped', d:'survey', src:'Survey only', fhir:'not represented', note:'Adverse event, progression, participant choice, withdrawal of consent. Intent is not recorded in the EHR.'},
  {step:'9a4a', v:'how_drug_used',    q:'On-label / off-label SOC / novel use', d:'review', src:'Derived', fhir:'RxNorm ingredient compared with FDA labeled indication (SPL/DailyMed) against Condition.code', note:'The pivotal computation of the whole project. Automate the first pass, require human adjudication, and keep the reasoning auditable.'},
  {step:'9a4b', v:'off_label_type',   q:'In what new way was it used', d:'review', src:'Derived + survey', fhir:'compare dose, route, schedule, and combination against label', note:'New indication versus new dose, schedule, duration, route, combination, or population. Partly computable, partly judgment.'},
@@ -2154,6 +2155,10 @@ VIEWS.cureid = ()=>{
   'no electronic health record contains: why treatment was chosen, what the goal of a line of therapy was, whether the person was misdiagnosed '+
   'first, whether they were exposed to Agent Orange or to the 9/11 site, and how they are actually doing. A pure record-extraction project '+
   'cannot fill this form. A survey-only project cannot fill the exposure and timing half. The combination can.</p>'+
+  '<div class="note"><b>The survey layer is not new, and it is not a consequence of this proposal.</b> A comprehensive participant-reported '+
+  'health survey was part of the registry design from the outset, adopted to supplement record data on its own merits. Its contribution to a '+
+  'CURE ID submission is a downstream benefit of a decision already taken, which is a materially different claim from proposing new participant '+
+  'burden in order to satisfy a federal CRF. See <a data-view="survey_hpo">Comprehensive Health Survey</a>.</div>'+
 
   '<h3 class="mt">Why now</h3>'+
   '<ul style="font-size:12.5px;max-width:860px">'+
@@ -2199,8 +2204,10 @@ VIEWS.cureid_flow = ()=>
   '<div class="flow">'+
     '<div class="stage s1"><div class="icon">&#128203;</div><h4>0. Consent</h4><p>Enrolment on the platform with a separate, explicit consent tier '+
     'for contribution to CURE ID as a named recipient.</p><div class="arrow">&#9654;</div></div>'+
-    '<div class="stage s1"><div class="icon">&#9883;</div><h4>1. Acquisition</h4><p>Participant-directed OAuth 2.0 and SMART on FHIR retrieval, plus '+
+    '<div class="stage s1"><div class="icon">&#9883;</div><h4>1a. Records</h4><p>Participant-directed OAuth 2.0 and SMART on FHIR retrieval, plus '+
     'C-CDA download and upload. The participant is the source, not the health system.</p><div class="arrow">&#9654;</div></div>'+
+    '<div class="stage s1"><div class="icon">&#9745;</div><h4>1b. Surveys</h4><p>Comprehensive HPO-coded health survey, plus the outcome and '+
+    'integrative-therapy instruments. Captures what records do not hold.</p><div class="arrow">&#9654;</div></div>'+
     '<div class="stage s2"><div class="icon">&#8644;</div><h4>2. Normalization</h4><p>RxNorm, SNOMED CT, ICD-10-CM, LOINC. Every translation child '+
     'of a coding is walked so inner codes survive.</p><div class="arrow">&#9654;</div></div>'+
     '<div class="stage s3"><div class="icon">&#9783;</div><h4>3. Common model</h4><p>Load to OMOP CDM. This is the registry of record and the thing '+
@@ -2213,7 +2220,7 @@ VIEWS.cureid_flow = ()=>
     'Curated signals return to the registry.</p></div>'+
   '</div>'+
 
-  '<h3 class="mt">Why the common data model sits in the middle</h3>'+
+  '<h3 class="mt">Two acquisition tracks, one model</h3>'+  '<p style="max-width:860px">The survey track is not a fallback for records that fail to arrive. It is a standing component of the registry design, adopted to supplement record data well before a CURE ID collaboration was contemplated, and it would remain in the design if that collaboration did not proceed. The two tracks answer different questions and converge at normalization. See <a data-view="survey_hpo">Comprehensive Health Survey</a> for the instrument and its coding.</p>'+  '<h3 class="mt">Why the common data model sits in the middle</h3>'+
   '<p style="max-width:860px">Mapping FHIR fields straight onto CRF variables and skipping stage three would be quicker, and would cost more than it saves. '+
   'The CRF is a reporting format, shaped by what a person can reasonably be asked in a web form. It flattens time, bands ages, and collapses a '+
   'treatment history into one best outcome. Every one of those choices is right for a case report and wrong for analysis. Loading to OMOP first '+
@@ -2491,6 +2498,105 @@ VIEWS.cureid_dd = ()=>{
   '</table></div>'+
   '<p><a class="btn sec" data-view="cadsr">NCI caDSR reference</a> <a class="btn sec" data-view="naaccr">NAACCR crosswalk</a> '+
   '<a class="btn sec" data-view="cureid_map">Element-level crosswalk</a></p>';
+};
+
+
+/* ---------- 6. Comprehensive HPO-coded health survey ---------- */
+const HPO_MODULES=[
+ ['Mother&rsquo;s pregnancy and delivery',8,'Amniotic fluid abnormality; decreased fetal movement; abnormal delivery'],
+ ['Growth',8,'Generalized overgrowth; obesity; hemihypertrophy'],
+ ['Hormone / endocrine',12,'Insulin and non-insulin dependent diabetes; delayed puberty'],
+ ['Cancer',16,'Breast, ovarian, uterine, cervical and other malignancies, each with age at diagnosis'],
+ ['Head / face / neck',10,'Abnormality of the chin; oral cleft; abnormal facial shape'],
+ ['Eyes / vision',11,'Abnormality of eye movement; abnormality of globe size; abnormality of the iris'],
+ ['Ears / hearing',8,'Conductive and sensorineural hearing impairment; abnormality of the ear'],
+ ['Brain / nervous system',12,'Abnormality of the nervous system; cerebral palsy; cognitive impairment'],
+ ['Behavior / psychiatric',12,'Autism spectrum disorder; bipolar affective disorder; schizophrenia'],
+ ['Skin',11,'Atrophic scarring; multiple caf&eacute;-au-lait spots; hyperpigmentation'],
+ ['Bone / cartilage / connective tissue',11,'Abnormality of limb bone morphology; abnormal curvature of the spine; joint hyperextensibility'],
+ ['Muscles',7,'Abnormality of facial musculature; abnormality of muscle physiology and morphology'],
+ ['Heart / blood vessels',10,'Aneurysm; cardiac arrhythmia; abnormal EKG'],
+ ['Lungs / breathing',8,'Asthma; abnormality of the respiratory system; decreased pulmonary function'],
+ ['Digestive system',9,'Feeding difficulties; abnormality of the esophagus and stomach'],
+ ['Kidney / bladder / genitals',10,'Abnormality of the bladder; abnormal sex determination; renal function'],
+ ['Immune system',5,'Autoimmunity; immunodeficiency; increased inflammatory response'],
+ ['Blood / bleeding',10,'Abnormal thrombosis; abnormality of coagulation; bleeding with minor or no trauma'],
+ ['Oral health',12,'Periodontitis; gingival inflammation; oral herpes']
+];
+
+VIEWS.survey_hpo = ()=>{
+  const totalOpts=HPO_MODULES.reduce((a,m)=>a+m[1],0);
+  const rows=HPO_MODULES.map(m=>
+    '<tr><td><b>'+m[0]+'</b></td><td style="text-align:right">'+m[1]+'</td>'+
+    '<td style="font-size:11.5px;color:#555">'+m[2]+'</td></tr>').join('');
+  return '<div class="crumbs">Data Collection &rsaquo; <b>Comprehensive Health Survey</b></div>'+
+  '<div class="kicker">Standing component of the registry design</div>'+
+  '<h2>Comprehensive HPO-coded health survey</h2>'+
+  '<p style="max-width:880px">The registry adopts the GenomeConnect Health Survey, the participant-reported instrument developed by ClinGen and '+
+  'published as supplementary material to the GenomeConnect registry description. It was selected to supplement record data on its own merits, '+
+  'independently of, and prior to, any discussion of a CURE ID collaboration.</p>'+
+
+  '<div class="cards">'+
+    '<div class="card"><h4>Screening questions</h4><div class="big">21</div><div class="sub">Gate the detailed modules</div></div>'+
+    '<div class="card"><h4>Body-system modules</h4><div class="big">'+HPO_MODULES.length+'</div><div class="sub">Shown only on a Yes answer</div></div>'+
+    '<div class="card"><h4>Coded findings</h4><div class="big">'+totalOpts+'</div><div class="sub">Response options across all modules</div></div>'+
+    '<div class="card"><h4>Unique HPO terms</h4><div class="big">183</div><div class="sub">Bound at the response-option level</div></div>'+
+  '</div>'+
+
+  '<div class="note"><b>The property that matters.</b> Every response option carries a Human Phenotype Ontology term. This is not a free-text '+
+  'symptom questionnaire that someone codes afterward. The participant selects a plain-language description and the registry receives '+
+  '<code>HP:0001513</code>. Survey-reported phenotype and record-derived phenotype land in the same semantic space, and can be queried together '+
+  'without a reconciliation step.</div>'+
+
+  '<h3 class="mt">Why this instrument was chosen</h3>'+
+  '<ul style="font-size:12.5px;max-width:880px">'+
+  '<li><b>Depth no record holds.</b> A structured review of systems across nineteen body systems, reported by the person living in the body. '+
+  'A connected portal returns what one health system happened to code during billable encounters.</li>'+
+  '<li><b>Onset and diagnosis captured separately.</b> Every finding records age at first symptom and age at diagnosis as distinct items. '+
+  'That interval is the diagnostic delay measure, it is a covariate for any causal model, and it is close to unrecoverable from records.</li>'+
+  '<li><b>Computable on arrival.</b> HPO binding means the survey feeds GA4GH Phenopackets directly, and reaches the condition domain of the '+
+  'common data model through the HPO to MONDO to ICD-10-CM and SNOMED CT path. The registry already holds working implementations of both.</li>'+
+  '<li><b>A second contribution pathway.</b> The genetic testing module captures test type, the reason for testing, and whether the participant '+
+  'holds a copy of the report, with upload supported. That supports variant submission through GenomeConnect and ClinVar, which is a route to '+
+  'public benefit entirely separate from the treatment-outcome route through CURE ID.</li>'+
+  '<li><b>Oncology-relevant on its own terms.</b> The cancer module records prior and additional malignancies as coded terms with age at '+
+  'diagnosis, which is the multiple-primary and predisposition context an oncology registry needs and a single-institution record view rarely '+
+  'assembles.</li>'+
+  '</ul>'+
+
+  '<h3 class="mt">Modules and coded findings</h3>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:30%">Module</th><th style="width:10%;text-align:right">Findings</th><th>Examples of coded terms</th></tr>'+rows+
+  '<tr><td colspan="3" style="background:#fbfaf7;font-size:11.5px;color:#555">Plus a genetic testing module covering test type, indication, '+
+  'and report availability, and a demographics module.</td></tr>'+
+  '</table></div>'+
+
+  '<h3 class="mt">What it contributes to a CURE ID submission</h3>'+
+  '<p style="max-width:880px">Listed second deliberately. These are downstream benefits of an instrument adopted for other reasons.</p>'+
+  '<div class="tbl-wrap"><table>'+
+  '<tr><th style="width:32%">CURE ID element</th><th>Source in this survey</th></tr>'+
+  '<tr><td><code>risk_factors_TPS_oncology</code></td><td>Genetic testing module, plus HPO-coded findings that indicate a predisposition '+
+  'syndrome phenotype.</td></tr>'+
+  '<tr><td><code>signs_symptoms_at_diagnosis</code></td><td>Coded findings with age at first symptom, across all nineteen systems.</td></tr>'+
+  '<tr><td><code>diagnostic_delays</code></td><td>Computed directly from the separately captured symptom-onset and diagnosis ages.</td></tr>'+
+  '<tr><td><code>genomic_testing</code>, <code>genomic_testing_details</code></td><td>Genetic testing module, including whether the '+
+  'participant holds the report.</td></tr>'+
+  '<tr><td><code>alternative_diagnosis</code></td><td>Findings reported without a corresponding record diagnosis prompt the misdiagnosis '+
+  'question rather than leaving it to unaided recall.</td></tr>'+
+  '<tr><td><code>adverse_events_generic</code></td><td>Pre-existing phenotype, which is what allows a new adverse event to be distinguished '+
+  'from a long-standing finding.</td></tr>'+
+  '</table></div>'+
+
+  '<h3 class="mt">Participant burden</h3>'+
+  '<p style="max-width:880px">This is a long instrument, and branching is what makes it tractable: a module expands only when its screening '+
+  'question is answered Yes, so a participant with findings in three systems answers three modules rather than nineteen. The registry commits '+
+  'to modular delivery across sessions rather than a single sitting, to save-and-resume on every module, and to reporting completion per module '+
+  'rather than as one aggregate percentage, since an aggregate figure obscures which content is actually present.</p>'+
+
+  '<p class="muted mt" style="font-size:11.5px;max-width:880px">Instrument content is drawn from the published GenomeConnect Health Survey '+
+  'supplementary material. Reproduced here for design reference; any deployment follows the terms set by the instrument developers. HPO term '+
+  'identifiers are those given in the source document.</p>'+
+  '<p><a class="btn sec" data-view="cureid_map">Element-level crosswalk</a> <a class="btn sec" data-view="cureid_flow">Architecture and data flow</a></p>';
 };
 
 /* ============================================================

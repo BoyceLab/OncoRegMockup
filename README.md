@@ -43,13 +43,25 @@ medications, labs, vitals, procedures) arrive first. Unstructured data (clinical
 are added in a second phase, with a natural language step that extracts concepts from free text.
 
 
+## Comprehensive Health Survey (HPO)
+
+The registry adopts the GenomeConnect Health Survey (ClinGen): 21 screening questions gating 19 body-system
+modules, 190 coded response options bound to 183 unique HPO terms, plus a genetic testing module. Every
+response option carries an HPO term, so survey-reported and record-derived phenotype share one semantic
+space and feed GA4GH Phenopackets directly. Age at first symptom and age at diagnosis are captured as
+separate items on every finding.
+
+This is a standing component of the registry design, adopted to supplement record data on its own merits
+and independently of the CURE ID discussion. See **Data Collection > Comprehensive Health Survey (HPO)**.
+
 ## CURE ID / CDRC collaboration section
 
 A four-page section proposing a demonstration project with the FDA-NCATS CURE ID treatment registry
 and the CURE Drug Repurposing Collaboratory at the Critical Path Institute:
 
 - **Proposal & Rationale** the case for machine-assisted, participant-attested case submission.
-- **Architecture & Data Flow** seven stages from consent to submitted case, with the open vendor decisions.
+- **Architecture & Data Flow** eight stages from consent to submitted case, with two co-equal acquisition
+  tracks (records and surveys) and the open vendor decisions.
 - **C-CDA/FHIR to CURE ID Crosswalk** all 47 elements of the Rare Cancer Generic CRF (v1.25, 17 Mar 2026)
   scored as auto-derivable, derive-then-confirm, survey-only, or human step. Downloadable as CSV.
 - **Evidence, Governance & Phasing** what the data can and cannot support for causal inference,
