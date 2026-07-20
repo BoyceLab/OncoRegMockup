@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1215" width="900" height="1215" font-family="Segoe UI,Verdana,Arial,Helvetica,sans-serif">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#9a9a9a"/>
+  </marker>
+  <marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0,0 L10,5 L0,10 z" fill="#0356a5"/>
+  </marker>
+</defs>
+
+<rect width="900" height="1215" fill="#ffffff"/>
+
+<!-- title -->
+<rect x="0" y="0" width="900" height="54" fill="#8a1a1a"/>
+<text x="30" y="26" fill="#ffffff" font-size="16" font-weight="700">Participant-Directed Oncology Registry to CURE ID</text>
+<text x="30" y="43" fill="#f0d5d5" font-size="11">Operational data flow protocol v0.1 &#183; draft for discussion &#183; three items block execution</text>
+<text x="870" y="34" fill="#f0d5d5" font-size="10.5" text-anchor="end">Data flow only. Analysis is a separate protocol.</text>
+
+<!-- ZONE A -->
+<rect x="24" y="68" width="852" height="404" rx="8" fill="#fbfaf7" stroke="#e2ddd2"/>
+<text x="38" y="88" fill="#8a1a1a" font-size="10" font-weight="700" letter-spacing="0.8">REGISTRY OF RECORD &#183; STEPS 0-3</text>
+<text x="862" y="88" fill="#6b6b6b" font-size="9.5" text-anchor="end">Consent tier (a) alone permits this half</text>
+
+<!-- Step 0 -->
+<rect x="180" y="100" width="540" height="80" rx="6" fill="#fef6f6" stroke="#e6c9c9"/>
+<text x="196" y="122" font-size="12.5" font-weight="700" fill="#2b2b2b">0 &#183; Enrollment and consent</text>
+<text x="196" y="139" font-size="10" fill="#6b6b6b">Actor: participant, with registry staff support. Three separately revocable tiers:</text>
+<rect x="196" y="147" width="152" height="22" rx="11" fill="#ffffff" stroke="#d9c3c3"/>
+<text x="272" y="162" font-size="9.5" fill="#2b2b2b" text-anchor="middle">(a) registry participation</text>
+<rect x="356" y="147" width="164" height="22" rx="11" fill="#ffffff" stroke="#d9c3c3"/>
+<text x="438" y="162" font-size="9.5" fill="#2b2b2b" text-anchor="middle">(b) CURE ID as recipient</text>
+<rect x="528" y="147" width="176" height="22" rx="11" fill="#ffffff" stroke="#d9c3c3"/>
+<text x="616" y="162" font-size="9.5" fill="#2b2b2b" text-anchor="middle">(c) ClinVar / GenomeConnect</text>
+
+<path d="M450,180 L450,198" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M450,192 L310,192 L310,204" stroke="#9a9a9a" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>
+<path d="M450,192 L590,192 L590,204" stroke="#9a9a9a" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>
+
+<!-- Step 1a / 1b -->
+<rect x="180" y="206" width="260" height="96" rx="6" fill="#fbf3e9" stroke="#e8d5ba"/>
+<text x="196" y="228" font-size="12.5" font-weight="700" fill="#2b2b2b">1a &#183; Record acquisition</text>
+<text x="196" y="245" font-size="10" fill="#6b6b6b">Participant authorizes OAuth 2.0 /</text>
+<text x="196" y="259" font-size="10" fill="#6b6b6b">SMART on FHIR. C-CDA upload also</text>
+<text x="196" y="273" font-size="10" fill="#6b6b6b">supported. Multiple connections</text>
+<text x="196" y="287" font-size="10" fill="#6b6b6b">expected; coverage recorded.</text>
+
+<rect x="460" y="206" width="260" height="96" rx="6" fill="#fbf3e9" stroke="#e8d5ba"/>
+<text x="476" y="228" font-size="12.5" font-weight="700" fill="#2b2b2b">1b &#183; Survey capture</text>
+<text x="476" y="245" font-size="10" fill="#6b6b6b">HPO-coded comprehensive health</text>
+<text x="476" y="259" font-size="10" fill="#6b6b6b">survey plus outcome instruments.</text>
+<text x="476" y="273" font-size="10" fill="#6b6b6b">Modular, resumable. Completion</text>
+<text x="476" y="287" font-size="10" fill="#6b6b6b">recorded per module.</text>
+
+<rect x="300" y="310" width="300" height="20" rx="10" fill="#ffffff" stroke="#e8d5ba"/>
+<text x="450" y="324" font-size="9.5" fill="#8a4f14" text-anchor="middle">Independent. Neither blocks the other; either may be completed alone.</text>
+
+<path d="M310,302 L310,344 L450,344 L450,356" stroke="#9a9a9a" stroke-width="1.5" fill="none"/>
+<path d="M590,302 L590,344 L450,344" stroke="#9a9a9a" stroke-width="1.5" fill="none"/>
+<path d="M450,344 L450,358" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+
+<!-- Step 2 -->
+<rect x="180" y="360" width="540" height="46" rx="6" fill="#fbf3e9" stroke="#e8d5ba"/>
+<text x="196" y="380" font-size="12.5" font-weight="700" fill="#2b2b2b">2 &#183; Normalization</text>
+<text x="196" y="396" font-size="10" fill="#6b6b6b">RxNorm, SNOMED CT, ICD-10-CM, LOINC. Every translation child walked. Cross-connection de-duplication. Source values retained.</text>
+
+<path d="M450,406 L450,422" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+
+<!-- Step 3 -->
+<rect x="180" y="424" width="540" height="42" rx="6" fill="#eef4fb" stroke="#c3d5e8"/>
+<text x="196" y="443" font-size="12.5" font-weight="700" fill="#2b2b2b">3 &#183; Common data model load (OMOP CDM)</text>
+<text x="196" y="459" font-size="10" fill="#6b6b6b">Registry of record and the substrate for all analysis. Survey phenotype enters via HPO to MONDO to standard concept.</text>
+
+<!-- ZONE B -->
+<rect x="24" y="486" width="852" height="514" rx="8" fill="#fdfcfa" stroke="#e2ddd2"/>
+<text x="38" y="506" fill="#8a1a1a" font-size="10" font-weight="700" letter-spacing="0.8">SUBMISSION PATH &#183; STEPS 4-7</text>
+<text x="862" y="506" fill="#6b6b6b" font-size="9.5" text-anchor="end">All three control gates sit here</text>
+
+<!-- G1 -->
+<path d="M450,466 L450,516" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="180" y1="520" x2="720" y2="520" stroke="#d24a43" stroke-width="1.2" stroke-dasharray="5 4"/>
+<rect x="300" y="510" width="300" height="21" rx="10.5" fill="#fdf0ef" stroke="#e3a9a4"/>
+<text x="450" y="524.5" font-size="9.5" font-weight="700" fill="#a8302a" text-anchor="middle">G1 &#183; consent tier (b) must be active to proceed</text>
+
+<!-- Step 4 -->
+<rect x="180" y="542" width="540" height="62" rx="6" fill="#eef6ee" stroke="#c4ddbf"/>
+<text x="196" y="562" font-size="12.5" font-weight="700" fill="#2b2b2b">4 &#183; Case derivation</text>
+<text x="196" y="578" font-size="10" fill="#6b6b6b">Assemble lines of therapy. First-pass off-label classification against labeled indication, dose, route, schedule, combination.</text>
+<text x="196" y="594" font-size="10" fill="#6b6b6b">Map outcomes and collapse value sets per the submission dictionary. Emits a reasoning trace for every derived value.</text>
+
+<!-- G2 -->
+<path d="M450,604 L450,616" stroke="#9a9a9a" stroke-width="1.5"/>
+<line x1="180" y1="620" x2="720" y2="620" stroke="#d24a43" stroke-width="1.2" stroke-dasharray="5 4"/>
+<rect x="292" y="610" width="316" height="21" rx="10.5" fill="#fdf0ef" stroke="#e3a9a4"/>
+<text x="450" y="624.5" font-size="9.5" font-weight="700" fill="#a8302a" text-anchor="middle">G2 &#183; no case advances without a complete reasoning trace</text>
+<path d="M450,631 L450,644" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+
+<!-- Step 5 -->
+<rect x="180" y="646" width="540" height="62" rx="6" fill="#f4eefb" stroke="#d4c5ea"/>
+<text x="196" y="666" font-size="12.5" font-weight="700" fill="#2b2b2b">5 &#183; Attestation</text>
+<text x="196" y="682" font-size="10" fill="#6b6b6b">Attestor sees every derived value with its source, corrects it, supplies survey-only elements, and signs.</text>
+<text x="196" y="698" font-size="10" fill="#5a3a8a" font-weight="600">Values that cannot be confirmed are withheld, never submitted with an assumed value.</text>
+
+<!-- G3 -->
+<path d="M450,708 L450,720" stroke="#9a9a9a" stroke-width="1.5"/>
+<line x1="180" y1="724" x2="720" y2="724" stroke="#d24a43" stroke-width="1.2" stroke-dasharray="5 4"/>
+<rect x="316" y="714" width="268" height="21" rx="10.5" fill="#fdf0ef" stroke="#e3a9a4"/>
+<text x="450" y="728.5" font-size="9.5" font-weight="700" fill="#a8302a" text-anchor="middle">G3 &#183; no value is exported unattested</text>
+<path d="M450,735 L450,748" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+
+<!-- Step 6 -->
+<rect x="180" y="750" width="540" height="62" rx="6" fill="#f4eefb" stroke="#d4c5ea"/>
+<text x="196" y="770" font-size="12.5" font-weight="700" fill="#2b2b2b">6 &#183; Disclosure control</text>
+<text x="196" y="786" font-size="10" fill="#6b6b6b">Apply the privacy transform recorded against each element: age banding, year and month only, interval-only durations,</text>
+<text x="196" y="802" font-size="10" fill="#6b6b6b">suppression below k, manual free-text review. Assign registry case ID. Participant previews exactly what is disclosed.</text>
+
+<path d="M450,812 L450,828" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+
+<!-- Step 7 -->
+<rect x="180" y="830" width="540" height="46" rx="6" fill="#eef4fb" stroke="#c3d5e8"/>
+<text x="196" y="850" font-size="12.5" font-weight="700" fill="#2b2b2b">7 &#183; Submission and feedback</text>
+<text x="196" y="866" font-size="10" fill="#6b6b6b">Transmit via the agreed structured pathway. De-duplicate against prior and clinician-submitted cases.</text>
+
+<path d="M450,876 L450,892" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+
+<!-- external -->
+<rect x="290" y="894" width="320" height="40" rx="6" fill="#ffffff" stroke="#8a1a1a" stroke-dasharray="5 3"/>
+<text x="450" y="912" font-size="12" font-weight="700" fill="#8a1a1a" text-anchor="middle">CURE ID (FDA / NCATS)</text>
+<text x="450" y="927" font-size="9.5" fill="#6b6b6b" text-anchor="middle">External. Public case repository.</text>
+
+<!-- feedback loop -->
+<path d="M610,914 L836,914 L836,445 L724,445" stroke="#0356a5" stroke-width="1.4" fill="none" stroke-dasharray="4 3" marker-end="url(#arb)"/>
+<text x="830" y="690" font-size="9.5" fill="#0356a5" text-anchor="middle" transform="rotate(-90 830 690)">Curated signals re-query the cohort</text>
+
+<!-- revocation note -->
+<rect x="40" y="894" width="228" height="40" rx="5" fill="#fdf0ef" stroke="#e3a9a4"/>
+<text x="52" y="910" font-size="9.5" font-weight="700" fill="#a8302a">Revocation of tier (b)</text>
+<text x="52" y="924" font-size="9" fill="#6b6b6b">halts submission immediately; withdrawal</text>
+<text x="52" y="934" font-size="9" fill="#6b6b6b">of prior cases per agreed procedure.</text>
+
+<!-- footer -->
+<line x1="24" y1="1018" x2="876" y2="1018" stroke="#cfcfcf"/>
+
+<text x="24" y="1042" font-size="10.5" font-weight="700" fill="#8a1a1a">STANDING RULES</text>
+<text x="24" y="1060" font-size="9.5" fill="#2b2b2b">&#183; Provenance is stored per value instance, not per element.</text>
+<text x="24" y="1076" font-size="9.5" fill="#2b2b2b">&#183; Off-label classification is proposed by software, decided by a human, reasoning stored.</text>
+<text x="24" y="1092" font-size="9.5" fill="#2b2b2b">&#183; Raw bundles and documents are retained unmodified. Mapping decisions get revisited.</text>
+
+<text x="24" y="1122" font-size="10.5" font-weight="700" fill="#8a1a1a">EXCLUDED FROM THIS PROTOCOL</text>
+<text x="24" y="1140" font-size="9.5" fill="#2b2b2b">Statistical analysis and causal inference (separate pre-registered protocol) &#183; institution-mediated bulk exports &#183; tokenized third-party linkage.</text>
+<text x="24" y="1154" font-size="9.5" fill="#6b6b6b">The last two are undecided; each would require an amendment.</text>
+
+<text x="480" y="1042" font-size="10.5" font-weight="700" fill="#a8302a">BLOCKING OPEN ITEMS</text>
+<text x="480" y="1060" font-size="9.5" fill="#2b2b2b">1. Attestation model. Which reporter branch a record-derived,</text>
+<text x="492" y="1073" font-size="9.5" fill="#2b2b2b">participant-confirmed case belongs to.</text>
+<text x="480" y="1089" font-size="9.5" fill="#2b2b2b">2. Case identifier namespace and de-duplication rule.</text>
+<text x="480" y="1105" font-size="9.5" fill="#2b2b2b">3. Structured intake pathway, including withdrawal procedure.</text>
+
+<text x="480" y="1180" font-size="9" fill="#6b6b6b">Prepared for internal discussion. Not reviewed or endorsed by FDA, NCATS, or NIH.</text>
+</svg>

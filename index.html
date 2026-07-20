@@ -348,6 +348,7 @@ tr:nth-child(even) td{background:#fbfaf8}
       <a class="nav" data-view="cureid"><span class="ic">&#9873;</span>Proposal &amp; Rationale</a>
       <a class="nav" data-view="cureid_flow"><span class="ic">&#8644;</span>Architecture &amp; Data Flow</a>
       <a class="nav" data-view="cureid_map"><span class="ic">&#9783;</span>C-CDA/FHIR &rarr; CURE ID Crosswalk</a>
+      <a class="nav" data-view="cureid_protocol"><span class="ic">&#9109;</span>Protocol Flow (v0.1)</a>
       <a class="nav" data-view="cureid_evidence"><span class="ic">&#9878;</span>Evidence, Governance &amp; Phasing</a>
       <a class="nav" data-view="cureid_dd"><span class="ic">&#128209;</span>Data Dictionary Specification</a>
     </div>
@@ -2059,7 +2060,7 @@ VIEWS.about = ()=>`
 `;
 
 /* ============================================================
-   CURE ID / CDRC COLLABORATION  (added section)
+   CURE ID COLLABORATION  (added section)
    ============================================================ */
 
 /* Element-level crosswalk: CURE ID Rare Cancer Generic CRF <- registry sources.
@@ -2171,7 +2172,7 @@ VIEWS.cureid = ()=>{
     'of CRF, not a change of architecture.</li>'+
   '</ul>'+
 
-  '<h3 class="mt">What we would be asking of CDRC, NCATS, and FDA</h3>'+
+  '<h3 class="mt">What we would be asking of NCATS and FDA</h3>'+
   '<div class="tbl-wrap"><table>'+
   '<tr><th style="width:26%">Ask</th><th style="width:37%">Why it is needed</th><th>What we bring</th></tr>'+
   '<tr><td>Agreement on machine-assisted case assembly</td><td>The CRF is written for a human reporter. A derived case needs an agreed '+
@@ -2281,13 +2282,13 @@ VIEWS.cureid_map = ()=>{
   'participant a question they would find tedious. Everything still passes through the attestation step before it leaves the registry.</div>'+
   '<h3 class="mt">Open specification questions for joint resolution</h3>'+
   '<p style="max-width:880px">Four points at which the CRF and participant-directed source data do not yet meet cleanly. Each is framed as a '+
-  'question for the collaboration rather than as a finding, since in every case CDRC or NCATS may hold context that changes the answer.</p>'+
+  'question for the collaboration rather than as a finding, since in every case NCATS or FDA may hold context that changes the answer.</p>'+
   '<div class="tbl-wrap"><table>'+
   '<tr><th style="width:22%">Question</th><th style="width:39%">Situation</th><th>Proposed approach</th></tr>'+
   '<tr><td><b>Disease-list binding.</b> How should coded diagnoses resolve to the CURE ID disease list?</td>'+
   '<td>The CURE ID disease field draws on a controlled list. Participant-directed records supply ICD-10-CM and SNOMED CT. No published '+
   'crosswalk between the two is known to the project team.</td>'+
-  '<td>The registry can draft a first-pass mapping and offer it to CDRC for review and, if useful, publication. The result would serve any '+
+  '<td>The registry can draft a first-pass mapping and offer it to the CURE ID team for review and, if useful, publication. The result would serve any '+
   'group submitting from coded source data, not this project alone.</td></tr>'+
   '<tr><td><b>Tumor morphology.</b> Should ICD-O-3 morphology have a coded home in the CRF?</td>'+
   '<td>ICD-O-3 is the standard vocabulary for naming a tumor in oncology. It has no dedicated element in the current CRF, and it appears '+
@@ -2297,7 +2298,7 @@ VIEWS.cureid_map = ()=>{
   '<tr><td><b>Response assessment.</b> What provenance should be expected for outcome on a line of therapy?</td>'+
   '<td>Formal response assessment is rarely structured in participant-directed data. In this registry the value will usually originate from a '+
   'participant report or from extraction of a radiology narrative.</td>'+
-  '<td>Record the provenance of every outcome value, and transmit it if CDRC finds it useful. This lets downstream users weight '+
+  '<td>Record the provenance of every outcome value, and transmit it if the CURE ID team finds it useful. This lets downstream users weight '+
   'clinician-assessed and participant-reported outcomes appropriately rather than treating them as equivalent.</td></tr>'+
   '<tr><td><b>Reporter branch.</b> Which branch applies when a case is assembled from records and then attested?</td>'+
   '<td>Several outcome options in the CRF are conditioned on the reporter being a care partner. A case derived from records and confirmed by '+
@@ -2352,7 +2353,7 @@ VIEWS.cureid_evidence = ()=>
   '<tr><td>Re-identification risk</td><td>CURE ID cases are publicly browsable. A rare sarcoma subtype, an unusual primary site, and a narrow age '+
   'band can identify someone in a community of a few hundred. Age banding, year-only dates, suppression of small cells, and a review of free-text '+
   'fields before submission are all mandatory, not optional.</td></tr>'+
-  '<tr><td>IRB</td><td>Name CURE ID and CDRC as recipients in the original protocol. Adding a federal recipient by amendment after enrolment has '+
+  '<tr><td>IRB</td><td>Name CURE ID as a recipient in the original protocol. Adding a federal recipient by amendment after enrolment has '+
   'begun means re-consenting people, and some will not respond.</td></tr>'+
   '<tr><td>Attestation and liability</td><td>Unresolved and blocking. Either the participant attests as a patient or care-partner reporter, or a '+
   'clinician co-signs. The CRF branches on this, so it cannot be deferred.</td></tr>'+
@@ -2365,7 +2366,7 @@ VIEWS.cureid_evidence = ()=>
   '<h3 class="mt">Phasing</h3>'+
   '<div class="tbl-wrap"><table>'+
   '<tr><th style="width:9%">Phase</th><th style="width:16%">Window</th><th style="width:37%">Work</th><th>Deliverable</th></tr>'+
-  '<tr><td><b>0</b></td><td>Now to Sept 2026</td><td>Align with CDRC, NCATS, and FDA. Confirm the CRF version. Settle the attestation model, the '+
+  '<tr><td><b>0</b></td><td>Now to Sept 2026</td><td>Align with NCATS and FDA. Confirm the CRF version. Settle the attestation model, the '+
   'case identifier namespace, and whether a structured intake pathway can exist.</td><td>Concept memo, and this page as the shared reference '+
   'artifact.</td></tr>'+
   '<tr><td><b>1</b></td><td>Oct to Dec 2026</td><td>Formalise the crosswalk. Build the ICD-10-CM and SNOMED CT to CURE ID disease-list mapping. '+
@@ -2373,7 +2374,7 @@ VIEWS.cureid_evidence = ()=>
   '<tr><td><b>2</b></td><td>Jan to Mar 2027</td><td>Technical demonstration on synthetic data and a consented pilot of ten to twenty-five '+
   'participants. End to end: record pull, common model load, case derivation, attestation interface, export file.</td><td>Reproducible pipeline '+
   'and a set of demonstration cases.</td></tr>'+
-  '<tr><td><b>3</b></td><td>Apr to Jun 2027</td><td>Live submission pathway with CDRC. De-duplication in operation. Signal feedback loop '+
+  '<tr><td><b>3</b></td><td>Apr to Jun 2027</td><td>Live submission pathway with the CURE ID team. De-duplication in operation. Signal feedback loop '+
   'established.</td><td>First submitted attested cases.</td></tr>'+
   '<tr><td><b>4</b></td><td>H2 2027</td><td>Analytic layer on the registry cohort. Off-label exposure surveillance, cohort assembly, negative '+
   'control calibration.</td><td>Methods paper and a candidate list with stated uncertainty.</td></tr>'+
@@ -2396,7 +2397,7 @@ VIEWS.cureid_evidence = ()=>
   'this registry as the primary source, rather than treating structured RECIST as an expected input.</td></tr>'+
   '</table></div>'+
   '<p class="muted mt" style="font-size:11.5px;max-width:880px">Draft prepared for internal discussion. Not affiliated with, and not reviewed or '+
-  'endorsed by, FDA, NCATS, NIH, or the Critical Path Institute. CRF variable names and response options are transcribed from the CURE ID '+
+  'endorsed by, FDA, NCATS, or NIH. CRF variable names and response options are transcribed from the CURE ID '+
   'Clinician and Patient CRF workbook supplied to the project team.</p>';
 
 
@@ -2597,6 +2598,33 @@ VIEWS.survey_hpo = ()=>{
   '<p><a class="btn sec" data-view="cureid_map">Element-level crosswalk</a> <a class="btn sec" data-view="cureid_flow">Architecture and data flow</a></p>';
 };
 
+
+/* ---------- 7. Protocol flow diagram ---------- */
+const PROTOCOL_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1215" font-family="Segoe UI,Verdana,Arial,Helvetica,sans-serif">\n<defs>\n  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">\n    <path d="M0,0 L10,5 L0,10 z" fill="#9a9a9a"/>\n  </marker>\n  <marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">\n    <path d="M0,0 L10,5 L0,10 z" fill="#0356a5"/>\n  </marker>\n</defs>\n\n<rect width="900" height="1215" fill="#ffffff"/>\n\n<!-- title -->\n<rect x="0" y="0" width="900" height="54" fill="#8a1a1a"/>\n<text x="30" y="26" fill="#ffffff" font-size="16" font-weight="700">Participant-Directed Oncology Registry to CURE ID</text>\n<text x="30" y="43" fill="#f0d5d5" font-size="11">Operational data flow protocol v0.1 &#183; draft for discussion &#183; three items block execution</text>\n<text x="870" y="34" fill="#f0d5d5" font-size="10.5" text-anchor="end">Data flow only. Analysis is a separate protocol.</text>\n\n<!-- ZONE A -->\n<rect x="24" y="68" width="852" height="404" rx="8" fill="#fbfaf7" stroke="#e2ddd2"/>\n<text x="38" y="88" fill="#8a1a1a" font-size="10" font-weight="700" letter-spacing="0.8">REGISTRY OF RECORD &#183; STEPS 0-3</text>\n<text x="862" y="88" fill="#6b6b6b" font-size="9.5" text-anchor="end">Consent tier (a) alone permits this half</text>\n\n<!-- Step 0 -->\n<rect x="180" y="100" width="540" height="80" rx="6" fill="#fef6f6" stroke="#e6c9c9"/>\n<text x="196" y="122" font-size="12.5" font-weight="700" fill="#2b2b2b">0 &#183; Enrollment and consent</text>\n<text x="196" y="139" font-size="10" fill="#6b6b6b">Actor: participant, with registry staff support. Three separately revocable tiers:</text>\n<rect x="196" y="147" width="152" height="22" rx="11" fill="#ffffff" stroke="#d9c3c3"/>\n<text x="272" y="162" font-size="9.5" fill="#2b2b2b" text-anchor="middle">(a) registry participation</text>\n<rect x="356" y="147" width="164" height="22" rx="11" fill="#ffffff" stroke="#d9c3c3"/>\n<text x="438" y="162" font-size="9.5" fill="#2b2b2b" text-anchor="middle">(b) CURE ID as recipient</text>\n<rect x="528" y="147" width="176" height="22" rx="11" fill="#ffffff" stroke="#d9c3c3"/>\n<text x="616" y="162" font-size="9.5" fill="#2b2b2b" text-anchor="middle">(c) ClinVar / GenomeConnect</text>\n\n<path d="M450,180 L450,198" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>\n<path d="M450,192 L310,192 L310,204" stroke="#9a9a9a" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>\n<path d="M450,192 L590,192 L590,204" stroke="#9a9a9a" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>\n\n<!-- Step 1a / 1b -->\n<rect x="180" y="206" width="260" height="96" rx="6" fill="#fbf3e9" stroke="#e8d5ba"/>\n<text x="196" y="228" font-size="12.5" font-weight="700" fill="#2b2b2b">1a &#183; Record acquisition</text>\n<text x="196" y="245" font-size="10" fill="#6b6b6b">Participant authorizes OAuth 2.0 /</text>\n<text x="196" y="259" font-size="10" fill="#6b6b6b">SMART on FHIR. C-CDA upload also</text>\n<text x="196" y="273" font-size="10" fill="#6b6b6b">supported. Multiple connections</text>\n<text x="196" y="287" font-size="10" fill="#6b6b6b">expected; coverage recorded.</text>\n\n<rect x="460" y="206" width="260" height="96" rx="6" fill="#fbf3e9" stroke="#e8d5ba"/>\n<text x="476" y="228" font-size="12.5" font-weight="700" fill="#2b2b2b">1b &#183; Survey capture</text>\n<text x="476" y="245" font-size="10" fill="#6b6b6b">HPO-coded comprehensive health</text>\n<text x="476" y="259" font-size="10" fill="#6b6b6b">survey plus outcome instruments.</text>\n<text x="476" y="273" font-size="10" fill="#6b6b6b">Modular, resumable. Completion</text>\n<text x="476" y="287" font-size="10" fill="#6b6b6b">recorded per module.</text>\n\n<rect x="300" y="310" width="300" height="20" rx="10" fill="#ffffff" stroke="#e8d5ba"/>\n<text x="450" y="324" font-size="9.5" fill="#8a4f14" text-anchor="middle">Independent. Neither blocks the other; either may be completed alone.</text>\n\n<path d="M310,302 L310,344 L450,344 L450,356" stroke="#9a9a9a" stroke-width="1.5" fill="none"/>\n<path d="M590,302 L590,344 L450,344" stroke="#9a9a9a" stroke-width="1.5" fill="none"/>\n<path d="M450,344 L450,358" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>\n\n<!-- Step 2 -->\n<rect x="180" y="360" width="540" height="46" rx="6" fill="#fbf3e9" stroke="#e8d5ba"/>\n<text x="196" y="380" font-size="12.5" font-weight="700" fill="#2b2b2b">2 &#183; Normalization</text>\n<text x="196" y="396" font-size="10" fill="#6b6b6b">RxNorm, SNOMED CT, ICD-10-CM, LOINC. Every translation child walked. Cross-connection de-duplication. Source values retained.</text>\n\n<path d="M450,406 L450,422" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>\n\n<!-- Step 3 -->\n<rect x="180" y="424" width="540" height="42" rx="6" fill="#eef4fb" stroke="#c3d5e8"/>\n<text x="196" y="443" font-size="12.5" font-weight="700" fill="#2b2b2b">3 &#183; Common data model load (OMOP CDM)</text>\n<text x="196" y="459" font-size="10" fill="#6b6b6b">Registry of record and the substrate for all analysis. Survey phenotype enters via HPO to MONDO to standard concept.</text>\n\n<!-- ZONE B -->\n<rect x="24" y="486" width="852" height="514" rx="8" fill="#fdfcfa" stroke="#e2ddd2"/>\n<text x="38" y="506" fill="#8a1a1a" font-size="10" font-weight="700" letter-spacing="0.8">SUBMISSION PATH &#183; STEPS 4-7</text>\n<text x="862" y="506" fill="#6b6b6b" font-size="9.5" text-anchor="end">All three control gates sit here</text>\n\n<!-- G1 -->\n<path d="M450,466 L450,516" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>\n<line x1="180" y1="520" x2="720" y2="520" stroke="#d24a43" stroke-width="1.2" stroke-dasharray="5 4"/>\n<rect x="300" y="510" width="300" height="21" rx="10.5" fill="#fdf0ef" stroke="#e3a9a4"/>\n<text x="450" y="524.5" font-size="9.5" font-weight="700" fill="#a8302a" text-anchor="middle">G1 &#183; consent tier (b) must be active to proceed</text>\n\n<!-- Step 4 -->\n<rect x="180" y="542" width="540" height="62" rx="6" fill="#eef6ee" stroke="#c4ddbf"/>\n<text x="196" y="562" font-size="12.5" font-weight="700" fill="#2b2b2b">4 &#183; Case derivation</text>\n<text x="196" y="578" font-size="10" fill="#6b6b6b">Assemble lines of therapy. First-pass off-label classification against labeled indication, dose, route, schedule, combination.</text>\n<text x="196" y="594" font-size="10" fill="#6b6b6b">Map outcomes and collapse value sets per the submission dictionary. Emits a reasoning trace for every derived value.</text>\n\n<!-- G2 -->\n<path d="M450,604 L450,616" stroke="#9a9a9a" stroke-width="1.5"/>\n<line x1="180" y1="620" x2="720" y2="620" stroke="#d24a43" stroke-width="1.2" stroke-dasharray="5 4"/>\n<rect x="292" y="610" width="316" height="21" rx="10.5" fill="#fdf0ef" stroke="#e3a9a4"/>\n<text x="450" y="624.5" font-size="9.5" font-weight="700" fill="#a8302a" text-anchor="middle">G2 &#183; no case advances without a complete reasoning trace</text>\n<path d="M450,631 L450,644" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>\n\n<!-- Step 5 -->\n<rect x="180" y="646" width="540" height="62" rx="6" fill="#f4eefb" stroke="#d4c5ea"/>\n<text x="196" y="666" font-size="12.5" font-weight="700" fill="#2b2b2b">5 &#183; Attestation</text>\n<text x="196" y="682" font-size="10" fill="#6b6b6b">Attestor sees every derived value with its source, corrects it, supplies survey-only elements, and signs.</text>\n<text x="196" y="698" font-size="10" fill="#5a3a8a" font-weight="600">Values that cannot be confirmed are withheld, never submitted with an assumed value.</text>\n\n<!-- G3 -->\n<path d="M450,708 L450,720" stroke="#9a9a9a" stroke-width="1.5"/>\n<line x1="180" y1="724" x2="720" y2="724" stroke="#d24a43" stroke-width="1.2" stroke-dasharray="5 4"/>\n<rect x="316" y="714" width="268" height="21" rx="10.5" fill="#fdf0ef" stroke="#e3a9a4"/>\n<text x="450" y="728.5" font-size="9.5" font-weight="700" fill="#a8302a" text-anchor="middle">G3 &#183; no value is exported unattested</text>\n<path d="M450,735 L450,748" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>\n\n<!-- Step 6 -->\n<rect x="180" y="750" width="540" height="62" rx="6" fill="#f4eefb" stroke="#d4c5ea"/>\n<text x="196" y="770" font-size="12.5" font-weight="700" fill="#2b2b2b">6 &#183; Disclosure control</text>\n<text x="196" y="786" font-size="10" fill="#6b6b6b">Apply the privacy transform recorded against each element: age banding, year and month only, interval-only durations,</text>\n<text x="196" y="802" font-size="10" fill="#6b6b6b">suppression below k, manual free-text review. Assign registry case ID. Participant previews exactly what is disclosed.</text>\n\n<path d="M450,812 L450,828" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>\n\n<!-- Step 7 -->\n<rect x="180" y="830" width="540" height="46" rx="6" fill="#eef4fb" stroke="#c3d5e8"/>\n<text x="196" y="850" font-size="12.5" font-weight="700" fill="#2b2b2b">7 &#183; Submission and feedback</text>\n<text x="196" y="866" font-size="10" fill="#6b6b6b">Transmit via the agreed structured pathway. De-duplicate against prior and clinician-submitted cases.</text>\n\n<path d="M450,876 L450,892" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>\n\n<!-- external -->\n<rect x="290" y="894" width="320" height="40" rx="6" fill="#ffffff" stroke="#8a1a1a" stroke-dasharray="5 3"/>\n<text x="450" y="912" font-size="12" font-weight="700" fill="#8a1a1a" text-anchor="middle">CURE ID (FDA / NCATS)</text>\n<text x="450" y="927" font-size="9.5" fill="#6b6b6b" text-anchor="middle">External. Public case repository.</text>\n\n<!-- feedback loop -->\n<path d="M610,914 L836,914 L836,445 L724,445" stroke="#0356a5" stroke-width="1.4" fill="none" stroke-dasharray="4 3" marker-end="url(#arb)"/>\n<text x="830" y="690" font-size="9.5" fill="#0356a5" text-anchor="middle" transform="rotate(-90 830 690)">Curated signals re-query the cohort</text>\n\n<!-- revocation note -->\n<rect x="40" y="894" width="228" height="40" rx="5" fill="#fdf0ef" stroke="#e3a9a4"/>\n<text x="52" y="910" font-size="9.5" font-weight="700" fill="#a8302a">Revocation of tier (b)</text>\n<text x="52" y="924" font-size="9" fill="#6b6b6b">halts submission immediately; withdrawal</text>\n<text x="52" y="934" font-size="9" fill="#6b6b6b">of prior cases per agreed procedure.</text>\n\n<!-- footer -->\n<line x1="24" y1="1018" x2="876" y2="1018" stroke="#cfcfcf"/>\n\n<text x="24" y="1042" font-size="10.5" font-weight="700" fill="#8a1a1a">STANDING RULES</text>\n<text x="24" y="1060" font-size="9.5" fill="#2b2b2b">&#183; Provenance is stored per value instance, not per element.</text>\n<text x="24" y="1076" font-size="9.5" fill="#2b2b2b">&#183; Off-label classification is proposed by software, decided by a human, reasoning stored.</text>\n<text x="24" y="1092" font-size="9.5" fill="#2b2b2b">&#183; Raw bundles and documents are retained unmodified. Mapping decisions get revisited.</text>\n\n<text x="24" y="1122" font-size="10.5" font-weight="700" fill="#8a1a1a">EXCLUDED FROM THIS PROTOCOL</text>\n<text x="24" y="1140" font-size="9.5" fill="#2b2b2b">Statistical analysis and causal inference (separate pre-registered protocol) &#183; institution-mediated bulk exports &#183; tokenized third-party linkage.</text>\n<text x="24" y="1154" font-size="9.5" fill="#6b6b6b">The last two are undecided; each would require an amendment.</text>\n\n<text x="480" y="1042" font-size="10.5" font-weight="700" fill="#a8302a">BLOCKING OPEN ITEMS</text>\n<text x="480" y="1060" font-size="9.5" fill="#2b2b2b">1. Attestation model. Which reporter branch a record-derived,</text>\n<text x="492" y="1073" font-size="9.5" fill="#2b2b2b">participant-confirmed case belongs to.</text>\n<text x="480" y="1089" font-size="9.5" fill="#2b2b2b">2. Case identifier namespace and de-duplication rule.</text>\n<text x="480" y="1105" font-size="9.5" fill="#2b2b2b">3. Structured intake pathway, including withdrawal procedure.</text>\n\n<text x="480" y="1180" font-size="9" fill="#6b6b6b">Prepared for internal discussion. Not reviewed or endorsed by FDA, NCATS, or NIH.</text>\n</svg>';
+
+VIEWS.cureid_protocol = ()=>
+  '<div class="crumbs">CURE ID Collaboration &rsaquo; <b>Protocol flow</b></div>'+
+  '<div class="kicker">Operational protocol v0.1 &#183; draft</div>'+
+  '<h2>Protocol flow diagram</h2>'+
+  '<p style="max-width:880px">The eight steps of the data flow protocol, with the three control gates and the boundary between the '+
+  'registry half and the submission half. This is the formal version of the strip on the '+
+  '<a data-view="cureid_flow">Architecture and Data Flow</a> page: same sequence, with the controls and the blocking items made explicit.</p>'+
+  '<p><a class="btn sec sm" id="dl-protosvg">Download SVG</a></p>'+
+  '<div style="border:1px solid var(--line);border-radius:8px;overflow:auto;background:#fff;padding:6px">'+
+  '<div style="min-width:900px">'+PROTOCOL_SVG+'</div></div>'+
+  '<h3 class="mt">Reading the diagram</h3>'+
+  '<ul style="font-size:12.5px;max-width:880px">'+
+  '<li><b>The two zones.</b> Steps 0 to 3 are the registry of record and run on consent tier (a) alone. Steps 4 to 7 are the submission '+
+  'path. All three control gates sit in the second zone, which is the point: nothing about the registry depends on CURE ID accepting a '+
+  'submission.</li>'+
+  '<li><b>Steps 1a and 1b are drawn side by side deliberately.</b> Neither blocks the other and either may be completed alone.</li>'+
+  '<li><b>The gates block a record, not the pipeline.</b> One incomplete case does not halt the others.</li>'+
+  '<li><b>The blue return path</b> is the only thing that flows back. Curated signals from CURE ID re-query the cohort in the common '+
+  'data model, not the submitted cases.</li>'+
+  '</ul>'+
+  '<p><a class="btn sec" data-view="cureid_flow">Architecture and data flow</a> '+
+  '<a class="btn sec" data-view="cureid_evidence">Governance and phasing</a></p>';
+
 /* ============================================================
    ROUTER + EVENTS
    ============================================================ */
@@ -2784,6 +2812,7 @@ function bind(view){
   }
   const ds=$('#dl-ddspec'); if(ds) ds.onclick=()=>downloadFile('OncoRegistry_DataDictionary_Specification.csv',ddToCSVgeneric(DD_SPEC));
   const du=$('#dl-ddsub'); if(du) du.onclick=()=>downloadFile('OncoRegistry_CUREID_Submission_Dictionary.csv',ddToCSVgeneric(DD_SUBMISSION));
+  const dp=$('#dl-protosvg'); if(dp) dp.onclick=()=>downloadFile('OncoRegistry_CUREID_Protocol_Flow.svg',PROTOCOL_SVG);
   // CURE ID crosswalk download
   const dc=$('#dl-cure'); if(dc) dc.onclick=()=>downloadFile('OncoRegistry_CUREID_Crosswalk.csv',cureMapToCSV());
   // export csv

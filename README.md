@@ -54,10 +54,10 @@ separate items on every finding.
 This is a standing component of the registry design, adopted to supplement record data on its own merits
 and independently of the CURE ID discussion. See **Data Collection > Comprehensive Health Survey (HPO)**.
 
-## CURE ID / CDRC collaboration section
+## CURE ID collaboration section
 
 A four-page section proposing a demonstration project with the FDA-NCATS CURE ID treatment registry
-and the CURE Drug Repurposing Collaboratory at the Critical Path Institute:
+and NCATS:
 
 - **Proposal & Rationale** the case for machine-assisted, participant-attested case submission.
 - **Architecture & Data Flow** eight stages from consent to submitted case, with two co-equal acquisition
@@ -67,7 +67,7 @@ and the CURE Drug Repurposing Collaboratory at the Critical Path Institute:
 - **Evidence, Governance & Phasing** what the data can and cannot support for causal inference,
   consent and re-identification posture, a five-phase plan, and a risk register.
 
-The crosswalk is the demonstration artefact. It is what makes the conversation with CDRC concrete.
+The crosswalk is the demonstration artefact. It is what makes the conversation with the CURE ID team concrete.
 
 ## Note
 
